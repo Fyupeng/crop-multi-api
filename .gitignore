@@ -1,0 +1,6 @@
+# Project exclude paths
+/crop-multi-common/target/
+/crop-multi-mapper/target/
+/crop-multi-pojo/target/
+/crop-multi-service/target/
+/crop-multi-web/target/
