@@ -1,43 +1,75 @@
 package com.crop.pojo;
 
+import java.util.Date;
+
 public class Picture {
-    private Integer pictureid;
+    private String id;
 
-    private String picturename;
+    private String userId;
 
-    private String pictureroute;
+    private String picturePath;
 
-    private Integer userid;
+    private String pictureDesc;
 
-    public Integer getPictureid() {
-        return pictureid;
+    private Double pictureWidth;
+
+    private Double pictureHeight;
+
+    private Date uploadTime;
+
+    public String getId() {
+        return id;
     }
 
-    public void setPictureid(Integer pictureid) {
-        this.pictureid = pictureid;
+    public void setId(String id) {
+        this.id = id == null ? null : id.trim();
     }
 
-    public String getPicturename() {
-        return picturename;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setPicturename(String picturename) {
-        this.picturename = picturename == null ? null : picturename.trim();
+    public void setUserId(String userId) {
+        this.userId = userId == null ? null : userId.trim();
     }
 
-    public String getPictureroute() {
-        return pictureroute;
+    public String getPicturePath() {
+        return picturePath;
     }
 
-    public void setPictureroute(String pictureroute) {
-        this.pictureroute = pictureroute == null ? null : pictureroute.trim();
+    public void setPicturePath(String picturePath) {
+        this.picturePath = picturePath == null ? null : picturePath.trim();
     }
 
-    public Integer getUserid() {
-        return userid;
+    public String getPictureDesc() {
+        return pictureDesc;
     }
 
-    public void setUserid(Integer userid) {
-        this.userid = userid;
+    public void setPictureDesc(String pictureDesc) {
+        this.pictureDesc = pictureDesc == null ? null : pictureDesc.trim();
+    }
+
+    public Double getPictureWidth() {
+        return pictureWidth;
+    }
+
+    public void setPictureWidth(Double pictureWidth) {
+        this.pictureWidth = pictureWidth;
+    }
+
+    public Double getPictureHeight() {
+        return pictureHeight;
+    }
+
+    public void setPictureHeight(Double pictureHeight) {
+        this.pictureHeight = pictureHeight;
+    }
+
+    public Date getUploadTime() {
+        return uploadTime;
+    }
+
+    public void setUploadTime(Date uploadTime) {
+        this.uploadTime = uploadTime;
     }
 }
