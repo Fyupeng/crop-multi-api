@@ -11,11 +11,11 @@
 数据库支持：mysql、redis、mongodb
 
 - redis作为缓存数据库，使用它来生成 userToken 秘钥
-![输入图片说明](crop-multi-api/img%E7%BC%93%E5%AD%98%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%AE%9E%E4%BE%8B%E5%9B%BE.png)
+![输入图片说明](crop-multi-api/img/%E7%BC%93%E5%AD%98%E7%B1%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%AE%9E%E4%BE%8B%E5%9B%BE.png)
 
 - mongodb作为文档数据库，可存储复杂类型的数据，我们的文章表存储成json格式到mongodb中
 实例数据：
-![输入图片说明](crop-multi-api/img%E6%96%87%E6%A1%A3%E7%B1%BB%E5%9E%8B%E5%AE%9E%E4%BE%8B%E5%9B%BE.png)
+![输入图片说明](crop-multi-api/img/%E6%96%87%E6%A1%A3%E7%B1%BB%E5%9E%8B%E5%AE%9E%E4%BE%8B%E5%9B%BE.png)
 
 
 #### 安装教程
