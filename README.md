@@ -6,6 +6,10 @@
 #### 软件架构
 软件架构说明
 
+接口文档：[http://47.107.63.171:8083/swagger-ui.htm](http://http://47.107.63.171:8083/swagger-ui.html)
+
+数据映射url：[http://47.107.63.171:9001/crop_multi_data/](http://http://47.107.63.171:9001/crop_multi_data/)
+
 后端数据存储采用两台服务器支持，一台作为mysql和reids缓存和基本类型数据存储，另一台作为大数据文章类型存储。
 
 数据库支持：mysql、redis、mongodb
