@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.crop.mapper.FeatureBaseMapper" >
+  <resultMap id="BaseResultMap" type="com.crop.pojo.FeatureBase" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="botany_id" property="botanyId" jdbcType="VARCHAR" />
+    <result column="pest_id" property="pestId" jdbcType="VARCHAR" />
+    <result column="botany_name" property="botanyName" jdbcType="VARCHAR" />
+    <result column="pest_name" property="pestName" jdbcType="VARCHAR" />
+    <result column="pic_path" property="picPath" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+  </resultMap>
+</mapper>
