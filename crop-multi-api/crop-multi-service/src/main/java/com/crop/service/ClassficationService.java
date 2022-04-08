@@ -14,7 +14,7 @@ import java.util.List;
 public interface ClassficationService {
     boolean queryClassficationIdIsExist(String classId);
 
-    void saveClassfication(Classfication classfication);
+    boolean saveClassfication(Classfication classfication);
 
     Classfication queryClssfication(Classfication classfication);
 
