@@ -1,9 +1,11 @@
 package com.crop.service.impl;
 
 import com.crop.mapper.ArticleRepository;
+import com.crop.mapper.Articles2tagsMapper;
 import com.crop.mapper.ClassficationMapper;
 import com.crop.mapper.UserInfoMapper;
 import com.crop.pojo.Article;
+import com.crop.pojo.Articles2tags;
 import com.crop.pojo.Classfication;
 import com.crop.pojo.UserInfo;
 import com.crop.pojo.vo.ArticleVO;
@@ -210,9 +212,10 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void save(Article article) {
+    public boolean save(Article article) {
 
         String articleId = sid.nextShort();
         article.setId(articleId);
@@ -222,13 +225,14 @@ public class ArticleServiceImpl implements ArticleService {
         article.setCommentCounts(0);
         article.setReceiveLikeCounts(0);
 
+        Article result = articleRepository.save(article);
 
-        Article save = articleRepository.save(article);
+        return result == null ? false : true;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void saveWithIdAndUserId(Article article) {
+    public boolean saveWithIdAndUserId(Article article) {
 
         Article oldArticle = articleRepository.findOne(article.getId());
 
@@ -237,7 +241,9 @@ public class ArticleServiceImpl implements ArticleService {
         article.setReceiveLikeCounts(oldArticle.getReceiveLikeCounts());
         article.setCommentCounts(oldArticle.getCommentCounts());
         article.setUpdateTime(new Date());
-        articleRepository.save(article);
+        Article result = articleRepository.save(article);
+
+        return result == null ? false : true;
     }
 
 
@@ -246,7 +252,7 @@ public class ArticleServiceImpl implements ArticleService {
         Example<Article> articleExample = Example.of(article, exampleMatcher);
         Pageable pageable = new PageRequest(page, pageSize);
         return articleRepository.findAll(articleExample, pageable);
-    } 
+    }
 
 
 }
