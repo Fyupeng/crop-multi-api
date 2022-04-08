@@ -2,6 +2,8 @@ package com.crop.service;
 
 import com.crop.pojo.Classfication;
 
+import java.util.List;
+
 /**
  * @Auther: fyp
  * @Date: 2022/4/3
@@ -15,4 +17,10 @@ public interface ClassficationService {
     void saveClassfication(Classfication classfication);
 
     Classfication queryClssfication(Classfication classfication);
+
+    List<Classfication> queryAllClassfications();
+
+    boolean deleteClassfication(String classficationId);
+
+    boolean updateClassfication(Classfication clssfication);
 }
