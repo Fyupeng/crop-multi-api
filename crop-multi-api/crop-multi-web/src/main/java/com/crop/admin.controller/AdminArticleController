@@ -1,5 +1,6 @@
 package com.crop.admin.controller;
 
+import com.crop.pojo.Article;
 import com.crop.pojo.Classfication;
 import com.crop.pojo.Comment;
 import com.crop.service.CommentService;
@@ -9,6 +10,7 @@ import com.crop.service.ArticleService;
 import com.crop.service.ClassficationService;
 import com.crop.service.UserService;
 import com.crop.utils.CropJSONResult;
+import com.crop.utils.PagedResult;
 import com.sun.scenario.effect.Crop;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -53,9 +55,6 @@ public class AdminArticleController extends BasicController {
     @Autowired
     private ClassficationService classficationService;
 
-    @Autowired
-    private CommentService commentService;
-
     private static ScheduledExecutorService executor;
 
 
@@ -76,6 +75,14 @@ public class AdminArticleController extends BasicController {
         // 用户不存在 或 无权 删除
         if (user == null || user.getPermission() != 3) {
             return CropJSONResult.errorMsg("用户不存在或你无权执行该操作");
+        }
+
+        Article article = new Article();
+        article.setClassId(classficationId);
+        PagedResult pagedResult = articleService.queryArticleSelective(article, 1, 1);
+
+        if (pagedResult.getRecords() != 0) {
+            return CropJSONResult.errorMsg("删除失败！存在文章绑定了分类id: " + classficationId);
         }
 
         boolean deleteClassficationIsTrue = classficationService.deleteClassfication(classficationId);
@@ -104,7 +111,7 @@ public class AdminArticleController extends BasicController {
 
         boolean updateClassficationIsTrue = classficationService.updateClassfication(classfication);
 
-        return updateClassficationIsTrue ? CropJSONResult.ok() : CropJSONResult.errorMsg("分类id不存在或内部错误");
+        return updateClassficationIsTrue ? CropJSONResult.ok() : CropJSONResult.errorMsg("分类id不存在或内部错误导致更新失败");
     }
 
     @PostMapping(value = "/saveClassfication")
@@ -129,41 +136,11 @@ public class AdminArticleController extends BasicController {
         Classfication classfication = new Classfication();
         classfication.setName(classficationName);
 
-        classficationService.saveClassfication(classfication);
+        boolean saveIsTrue = classficationService.saveClassfication(classfication);
 
-        return CropJSONResult.ok();
+        return saveIsTrue ? CropJSONResult.ok() : CropJSONResult.errorMsg("内部错误导致保存失败");
     }
 
-    @PostMapping(value = "removeComment")
-    @ApiOperation(value = "撤回评论", notes = "撤回评论的接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "commentId", value = "评论id", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
-    })
-    public CropJSONResult removeComment(String commentId, String userId) {
-
-        if (StringUtils.isBlank(commentId) || StringUtils.isBlank(userId)) {
-            return CropJSONResult.errorMsg("commentId或userId不能为空");
-        }
-
-        /**
-         * 优化
-         */
-        //boolean commentIsExist = commentService.queryByCommentIsExist(commentId);
-        //
-        //if (!commentIsExist) {
-        //    return CropJSONResult.errorMsg("commentId不存在");
-        //}
-
-        User identifyUser = userService.queryUser(userId);
-        if (identifyUser == null || identifyUser.getPermission() != 3) {
-            return CropJSONResult.errorMsg("用户Id不存在或无权限");
-        }
-
-        boolean commentIsRemove = commentService.removeCommentById(commentId);
-
-        return commentIsRemove ? CropJSONResult.ok() : CropJSONResult.errorMsg("commentId不存在或内部错误");
-    }
 
     @PostMapping(value = "/startTimeTask")
     @ApiOperation(value = "开启任务 - 自动更新阅读量", notes = "开启任务的接口")
