@@ -246,7 +246,7 @@ public class ArticleServiceImpl implements ArticleService {
         Example<Article> articleExample = Example.of(article, exampleMatcher);
         Pageable pageable = new PageRequest(page, pageSize);
         return articleRepository.findAll(articleExample, pageable);
-    }
+    } 
 
 
 }
