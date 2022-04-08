@@ -12,10 +12,10 @@ import com.crop.utils.PagedResult;
  */
 public interface CommentService {
 
-    void saveComment(Comment comment);
+    boolean saveComment(Comment comment);
 
 
-    boolean removeCommentById(String commentId);
+    void removeCommentById(String commentId);
 
     Comment queryComment(String commentId);
 
@@ -24,4 +24,8 @@ public interface CommentService {
     boolean updateComment(Comment comment);
 
     PagedResult queryAllComments(String articleId, Integer page, Integer pageSize);
+
+    boolean queryCommentWithFatherCommentIsExist(String commentId);
+
+    void removeCommentWithFatherCommentId(String fatherCommentId);
 }
