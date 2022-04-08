@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -180,5 +182,31 @@ public class RedisOperator {
 		return redisTemplate.opsForList().rightPush(key, value);
 	}
 
+	/**
+	 * 通过 前缀 匹配 获取 所有 key 值
+	 * @param keyPrefix
+	 * @return
+	 */
+	public List<String> getKeysByPrefix(String keyPrefix) {
+		Set<String> keys = redisTemplate.keys(keyPrefix + "*");
+		return Arrays.asList(keys.toArray(new String[0]));
+	}
+
+	/**
+	 * 通过 keys 集合 获取 所以 相对于的 values
+	 * @param keys
+	 * @return
+	 */
+	public List<String> multiGet(List<String> keys) {
+		 return redisTemplate.opsForValue().multiGet(keys);
+	}
 
 }
+
+
+
+
+
+
+
+
