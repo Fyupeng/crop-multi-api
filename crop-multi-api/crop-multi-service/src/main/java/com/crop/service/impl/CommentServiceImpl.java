@@ -34,6 +34,7 @@ public class CommentServiceImpl implements CommentService {
     private Sid sid;
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
     public boolean queryCommentIsExist(String commentId) {
         return commentRepository.findOne(commentId) == null ? false : true;
     }
@@ -45,6 +46,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
     public PagedResult queryAllComments(String articleId, Integer page, Integer pageSize) {
 
         //分页查询对象
@@ -89,16 +91,36 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public boolean queryCommentWithFatherCommentIsExist(String commentId) {
+
+        ExampleMatcher matching = ExampleMatcher.matching();
+        ExampleMatcher exampleMatcher = matching.withMatcher("fatherCommentId", ExampleMatcher.GenericPropertyMatchers.exact());
+
+        Comment comment = new Comment();
+        comment.setFatherCommentId(commentId);
+
+        Example<Comment> commentExample = Example.of(comment, exampleMatcher);
+
+        Comment result = commentRepository.findOne(commentExample);
+
+        return result == null ? false : true;
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void saveComment(Comment comment) {
+    public boolean saveComment(Comment comment) {
 
         String commentId = sid.nextShort();
         comment.setId(commentId);
         comment.setCreateTime(new Date());
-        commentRepository.save(comment);
+        Comment result = commentRepository.save(comment);
+
+        return result == null ? false : true;
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateComment(Comment comment) {
 
         Comment result = commentRepository.save(comment);
@@ -108,13 +130,20 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean removeCommentById(String commentId) {
-
-        Comment comment = commentRepository.findOne(commentId);
+    public void removeCommentById(String commentId) {
 
         commentRepository.delete(commentId);
 
-        return comment == null ? false : true;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void removeCommentWithFatherCommentId(String fatherCommentId) {
+
+        Comment comment = new Comment();
+        comment.setFatherCommentId(fatherCommentId);
+
+        commentRepository.delete(comment);
     }
 
 
