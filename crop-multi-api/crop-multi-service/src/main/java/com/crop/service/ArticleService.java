@@ -1,6 +1,7 @@
 package com.crop.service;
 
 import com.crop.pojo.Article;
+import com.crop.pojo.Articles2tags;
 import com.crop.pojo.vo.ArticleVO;
 import com.crop.utils.PagedResult;
 
@@ -21,13 +22,13 @@ public interface ArticleService {
 
     boolean queryArticleIsUser(Article article);
 
-    void save(Article article);
+    boolean save(Article article);
 
     PagedResult queryArticleSelective(Article article, Integer page, Integer pageSize);
 
     ArticleVO queryArticleDetail(String articleId);
 
-    void saveWithIdAndUserId(Article article);
+    boolean saveWithIdAndUserId(Article article);
 
     void multiUpdateArticleReadCounts(List<String> articleIdKeys, Map<String, String> articleMap);
 
