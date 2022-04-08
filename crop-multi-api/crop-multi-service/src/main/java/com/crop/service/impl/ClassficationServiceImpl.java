@@ -76,13 +76,15 @@ public class ClassficationServiceImpl implements ClassficationService {
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void saveClassfication(Classfication classfication) {
+    public boolean saveClassfication(Classfication classfication) {
 
         String classficationId = sid.nextShort();
 
         classfication.setId(classficationId);
 
-        classficationMapper.insert(classfication);
+        int i = classficationMapper.insert(classfication);
+
+        return i > 0 ? true : false;
     }
 
     @Override
