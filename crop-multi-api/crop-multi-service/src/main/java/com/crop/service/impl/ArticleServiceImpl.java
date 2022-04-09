@@ -212,6 +212,12 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void removeArticle(String articleId) {
+        articleRepository.delete(articleId);
+    }
+
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
