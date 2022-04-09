@@ -32,4 +32,5 @@ public interface ArticleService {
 
     void multiUpdateArticleReadCounts(List<String> articleIdKeys, Map<String, String> articleMap);
 
+    void removeArticle(String articleId);
 }
