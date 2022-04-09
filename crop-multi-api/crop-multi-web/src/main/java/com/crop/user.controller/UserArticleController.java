@@ -211,6 +211,32 @@ public class UserArticleController extends BasicController {
 
     }
 
+    @PostMapping(value = "/removeArticle")
+    @ApiOperation(value = "删除文章", notes = "删除文章的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "articleId", value = "文章id", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
+    })
+
+    public CropJSONResult removeArticle(String articleId, String userId) {
+        if (StringUtils.isBlank(articleId) || StringUtils.isBlank(userId)) {
+            return CropJSONResult.errorMsg("articleId或userId不能为空");
+        }
+
+        Article article = new Article();
+        article.setId(articleId);
+        article.setUserId(userId);
+        boolean articleIsUser = articleService.queryArticleIsUser(article);
+
+        if (!articleIsUser) {
+            return CropJSONResult.errorMsg("articleId不存在或者userId与commentId约束的userId不同");
+        }
+
+        articleService.removeArticle(articleId);
+
+        return CropJSONResult.ok();
+    }
+
     @PostMapping(value = "/getAllClassfications")
     @ApiOperation(value = "获取文章分类信息", notes = "获取文章分类信息的接口")
     public CropJSONResult getAllClassfications() {
