@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crop.mapper.PictureMapper">
+  <resultMap id="BaseResultMap" type="com.crop.pojo.Picture">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="picture_path" jdbcType="VARCHAR" property="picturePath" />
+    <result column="picture_desc" jdbcType="VARCHAR" property="pictureDesc" />
+    <result column="picture_width" jdbcType="DOUBLE" property="pictureWidth" />
+    <result column="picture_height" jdbcType="DOUBLE" property="pictureHeight" />
+    <result column="upload_time" jdbcType="TIMESTAMP" property="uploadTime" />
+  </resultMap>
+
+
+</mapper>
