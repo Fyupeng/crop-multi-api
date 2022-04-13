@@ -11,13 +11,21 @@ public class BasicController {
 
     @Autowired
     public RedisOperator redis;
+    /**
+     * fix - 解耦到 RedisUtils
+     */
+    //public static final String CROP = "crop";
+    //
+    //public static final String USER_REDIS_SESSION = CROP + ":" + "user-redis-session";
+    //public static final String ADMIN_REDIS_SESSION = CROP + ":" + "admin-redis-session";
+    //
+    //
+    //public static final String IS_VIEW = CROP + ":" + "isView";
+    //
+    //public static final String VIEW_COUNT = CROP + ":" + "viewCount";
+    //
+    //public static final String SEARCH_HISTORY = CROP + ":" + "searchHistory";
 
-    public static final String USER_REDIS_SESSION = "user-redis-session";
-    public static final String ADMIN_REDIS_SESSION = "admin-redis-session";
-
-    public static final String IS_VIEW = "isView";
-
-    public static final String VIEW_COUNT = "viewCount";
     ////文件保存的命名空间
     //public static final String FILE_SPACE = "D:/tony_videos_dev";
     ////ffmpeg所在目录
