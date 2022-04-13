@@ -5,6 +5,7 @@ import com.crop.pojo.vo.UserVO;
 import com.crop.service.UserService;
 import com.crop.utils.CropJSONResult;
 import com.crop.utils.MD5Utils;
+import com.crop.utils.RedisUtils;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -58,7 +59,10 @@ public class UserRegistLoginController extends BasicController{
 
     public UserVO setUserRedisSessionToken(User userModel){
         String uniqueToken = UUID.randomUUID().toString();
-        redis.set(USER_REDIS_SESSION + ":" + userModel.getId(), uniqueToken,  60 * 30);
+
+        String userRedisSession = RedisUtils.getUserRedisSession(userModel.getId());
+
+        redis.set(userRedisSession, uniqueToken,  60 * 30);
 
         UserVO usersVO = new UserVO();
         BeanUtils.copyProperties(userModel, usersVO);
@@ -95,7 +99,8 @@ public class UserRegistLoginController extends BasicController{
     @PostMapping(value = "/logout")
     public CropJSONResult logout(String userId) throws Exception {
 
-        redis.del(USER_REDIS_SESSION + ":" + userId);
+        String userRedisSession = RedisUtils.getUserRedisSession(userId);
+        redis.del(userRedisSession);
 
         return CropJSONResult.ok("注销成功");
 
