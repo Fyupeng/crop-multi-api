@@ -102,7 +102,7 @@ public class AdminRegistLoginController extends BasicController {
     @PostMapping(value = "/logout")
     public CropJSONResult logout(String userId) throws Exception {
 
-        String userRedisSession = RedisUtils.getUserRedisSession(userId);
+        String userRedisSession = RedisUtils.getAdminRedisSession(userId);
         redis.del(userRedisSession);
 
         return CropJSONResult.ok("注销成功");
