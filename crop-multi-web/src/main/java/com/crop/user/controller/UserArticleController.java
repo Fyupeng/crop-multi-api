@@ -1,5 +1,6 @@
 package com.crop.user.controller;
 
+import com.crop.interceptor.SensitiveFilter;
 import com.crop.pojo.*;
 import com.crop.pojo.vo.ArticleVO;
 import com.crop.service.*;
@@ -15,6 +16,7 @@ import org.springframework.data.redis.core.Cursor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -44,19 +46,34 @@ public class UserArticleController extends BasicController {
     @PostMapping(value = "/getAllArticles")
     @ApiOperation(value = "查找文章信息", notes = "查找文章信息的接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "key", value = "关键字", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "searchKey", value = "搜索关键字", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "page", value = "当前页", required = false, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "pageSize", value = "页数", required = false, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "userId", value = "用户id", required = false, dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
     })
-    public CropJSONResult getAllArticles(String key, Integer page, Integer pageSize, String userId) {
-        if (StringUtils.isBlank(key)) {
-            return CropJSONResult.errorMsg("关键字不能为空");
+    public CropJSONResult getAllArticles(String searchKey, Integer page, Integer pageSize, String userId) {
+        if (StringUtils.isBlank(userId) || StringUtils.isBlank(searchKey)) {
+            return CropJSONResult.errorMsg("用户id和搜索关键字不能为空");
         }
 
-        boolean addTrue = addSearchHistory(userId, key);
+        //非法敏感词汇判断
+        SensitiveFilter filter = null;
+        try {
+            filter = SensitiveFilter.getInstance();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int n = filter.CheckSensitiveWord(searchKey,0,1);
+        if(n > 0){ //存在非法字符
+            log.info("这个人输入了非法字符--> {},不知道他到底要查什么~ userid--> {}",searchKey,userId);
+            String x = filter.replaceSensitiveWord(searchKey, 1, "*");
+            Set<String> sensitiveWord = filter.getSensitiveWord(searchKey, 1);
+            return CropJSONResult.ok(sensitiveWord);
+        }
+
+        boolean addTrue = addSearchHistory(userId, searchKey);
         if (!addTrue) {
-            log.info("已存在key：{}",key);
+            log.info("已存在key：{}",searchKey);
         }
 
         //前端不传该参时会初始化
@@ -71,7 +88,7 @@ public class UserArticleController extends BasicController {
         List<Article> articleList = null;
 
         Classfication classfication = new Classfication();
-        classfication.setName(key);
+        classfication.setName(searchKey);
 
         Classfication cf = classficationService.queryClssfication(classfication);
 
@@ -79,9 +96,9 @@ public class UserArticleController extends BasicController {
         if (cf != null) {
             article.setClassId(cf.getId());
         } else {
-            article.setTitle(key);
-            article.setSummary(key);
-            article.setContent(key);
+            article.setTitle(searchKey);
+            article.setSummary(searchKey);
+            article.setContent(searchKey);
         }
         // 优先 匹配 分类 id
         // 第二 优先 匹配 标题
@@ -108,6 +125,11 @@ public class UserArticleController extends BasicController {
             @ApiImplicitParam(name = "searchKey",  value = "搜索关键字",required = true, dataType = "String", paramType = "query")
     })
     public CropJSONResult removeHistory(String userId, String searchKey) {
+
+        if (StringUtils.isBlank(userId) || StringUtils.isBlank(searchKey)) {
+            return CropJSONResult.errorMsg("用户id和搜索关键字不能为空");
+        }
+
         Long history = delSearchHistory(userId, searchKey);
         return CropJSONResult.ok(history);
     }
@@ -119,16 +141,19 @@ public class UserArticleController extends BasicController {
      * @return false: 已存在 - true : 添加成功
      */
     private boolean addSearchHistory(String userId, String searchKey) {
+
         String searchHistoryKey = RedisUtils.getSearchHistoryKey(userId);
         boolean keyIsExist = redis.hasKey(searchHistoryKey);
         if (keyIsExist) {
             String hk = redis.hget(searchHistoryKey, searchKey);
+            // 关键字 key 存在
             if (hk != null) {
                 return false;
+            // 关键 key 不存在
             } else {
                 redis.hset(searchHistoryKey, searchKey, "1");
             }
-
+        // 首次 会 创建 包含 userId 的 key
         } else {
             redis.hset(searchHistoryKey, searchKey, "1");
         }
@@ -164,6 +189,81 @@ public class UserArticleController extends BasicController {
     private Long delSearchHistory(String userId, String searchKey) {
         String searchHistoryKey = RedisUtils.getSearchHistoryKey(userId);
         return redis.hdel(searchHistoryKey, searchKey);
+    }
+
+    @PostMapping(value = "/incrementArticleScore")
+    @ApiOperation(value = "自增关键字热度", notes = "自增关键字热度的接口")
+    @ApiImplicitParam(name = "searchKey", value = "搜索关键字", required = true, dataType = "String", paramType = "query")
+    private CropJSONResult incrementArticleScore(String searchKey) {
+
+        if (StringUtils.isBlank(searchKey)) {
+            return CropJSONResult.errorMsg("搜索关键字不能为空");
+        }
+        /**
+         * 规则： key: search-score
+         *       value: java-1, linux-2 python-3
+         */
+        String searchScoreKey = RedisUtils.getSearchScoreKey();
+        Long now = System.currentTimeMillis();
+
+        // 只需第一次设置 时间戳
+        if (redis.zScore(searchScoreKey, searchKey) == null) {
+            // 统计 时间戳
+            /**
+             * 规则： key: search-score:java
+             *       value: 时间戳
+             */
+            String keyWithSearchKey = RedisUtils.getSearchScoreKeyWithSearchKey(searchKey);
+            redis.set(keyWithSearchKey, String.valueOf(now));
+        }
+        // 统计 点击量
+        redis.zIncrementScore(searchScoreKey, searchKey, 1);
+
+        return CropJSONResult.ok();
+    }
+
+    @PostMapping(value = "/getHotSearchKey")
+    @ApiOperation(value = "获取搜索热度", notes = "获取搜索热度的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "searchKey", value = "搜索关键字", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "size", value = "检索数", dataType = "Integer", paramType = "query")
+    })
+    public CropJSONResult getHotSearchKey(String searchKey, Integer size) {
+
+        if (StringUtils.isBlank(searchKey)) {
+            return CropJSONResult.errorMsg("搜索关键字不能为空");
+        }
+
+        if (size == null) {
+            size = SEARCH_SIZE;
+        }
+
+        Long now = System.currentTimeMillis();
+
+        String searchScoreKey = RedisUtils.getSearchScoreKey();
+        Set<String> allKeys = redis.zRevRangeByScore(searchScoreKey, 0, Double.MAX_VALUE);
+
+        List<String> resultList = new ArrayList<>();
+        for (String key : allKeys) {
+            // 在所有的 key 中包含 用户输入的 ${searchKey}
+            if (StringUtils.containsIgnoreCase(key, searchKey)) {
+                // 记录数 已达 期待数，停止检索
+                if (resultList.size() >= size) {
+                    break;
+                }
+                // 规则：与 新增 关键字 时做的 时间戳 key 值相对应
+                String searchScoreKeyWithSearchKey = RedisUtils.getSearchScoreKeyWithSearchKey(key);
+                Long time = Long.valueOf(redis.get(searchScoreKeyWithSearchKey));
+                // 查询 最近一个礼拜的 数据
+                if ((now - time) < 604800000L) {
+                    resultList.add(key);
+                } else {
+                    redis.zset(searchScoreKey, key, 0);
+                }
+            }
+        }
+        return CropJSONResult.ok(resultList);
+
     }
 
     @PostMapping(value = "/getRecommendArticles")
