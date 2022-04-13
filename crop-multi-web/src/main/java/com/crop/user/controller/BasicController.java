@@ -45,5 +45,7 @@ public class BasicController {
     // 图片分页
     public static final Integer PICTURE_PAGE_SIZE = 10;
 
+    public static final Integer SEARCH_SIZE = 10;
+
 
 }
