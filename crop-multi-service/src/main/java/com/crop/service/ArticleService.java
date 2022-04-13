@@ -33,4 +33,6 @@ public interface ArticleService {
     void multiUpdateArticleReadCounts(List<String> articleIdKeys, Map<String, String> articleMap);
 
     void removeArticle(String articleId);
+
+    PagedResult queryArticleByTime(Long timeDifference, Integer page, Integer pageSize);
 }
