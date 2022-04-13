@@ -1,6 +1,7 @@
 package com.crop.user.controller;
 
 import com.crop.utils.RedisOperator;
+import com.mysql.cj.exceptions.StatementIsClosedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,6 +47,14 @@ public class BasicController {
     public static final Integer PICTURE_PAGE_SIZE = 10;
 
     public static final Integer SEARCH_SIZE = 10;
+
+    public static final Long ONE_WEEK = 604800000L;
+
+    public static final Long TWO_WEEK = 1209600000L;
+
+    public static final Long ONE_MONTH = 2592000000L; // 30天
+
+    public static final Long ONE_YEAR = 31536000000L;
 
 
 }
