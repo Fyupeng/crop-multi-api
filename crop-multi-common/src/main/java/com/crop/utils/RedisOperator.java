@@ -1,9 +1,13 @@
 package com.crop.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +27,15 @@ public class RedisOperator {
 	private StringRedisTemplate redisTemplate;
 
 	// Key（键），简单的key-value操作
+
+	/**
+	 * 查询 key 值是否 存在
+	 * @param key
+	 * @return
+	 */
+	public boolean hasKey(String key) {
+		return redisTemplate.hasKey(key);
+	}
 
 	/**
 	 * 实现命令：TTL key，以秒为单位，返回给定 key的剩余生存时间(TTL, time to live)。
@@ -70,8 +83,27 @@ public class RedisOperator {
 		redisTemplate.delete(key);
 	}
 
-	// String（字符串）
+	/**
+	 * 通过 前缀 匹配 获取 所有 key 值
+	 * @param keyPrefix
+	 * @return
+	 */
+	public List<String> getKeysByPrefix(String keyPrefix) {
+		Set<String> keys = redisTemplate.keys(keyPrefix + "*");
+		return Arrays.asList(keys.toArray(new String[0]));
+	}
 
+	/**
+	 * 通过 keys 集合 获取 所以 相对于的 values
+	 * @param keys
+	 * @return
+	 */
+	public List<String> multiGet(List<String> keys) {
+		return redisTemplate.opsForValue().multiGet(keys);
+	}
+
+
+	// String（字符串）
 	/**
 	 * 实现命令：SET key value，设置一个key-value（将字符串值 value关联到 key）
 	 *
@@ -134,8 +166,8 @@ public class RedisOperator {
 	 * @param key
 	 * @param fields
 	 */
-	public void hdel(String key, Object... fields) {
-		redisTemplate.opsForHash().delete(key, fields);
+	public Long hdel(String key, Object... fields) {
+		return redisTemplate.opsForHash().delete(key, fields);
 	}
 
 	/**
@@ -148,6 +180,9 @@ public class RedisOperator {
 		return redisTemplate.opsForHash().entries(key);
 	}
 
+	public Cursor<Map.Entry<Object, Object>> hscan(String key) {
+		return redisTemplate.opsForHash().scan(key, ScanOptions.NONE);
+	}
 	// List（列表）
 
 	/**
@@ -182,23 +217,14 @@ public class RedisOperator {
 		return redisTemplate.opsForList().rightPush(key, value);
 	}
 
-	/**
-	 * 通过 前缀 匹配 获取 所有 key 值
-	 * @param keyPrefix
-	 * @return
-	 */
-	public List<String> getKeysByPrefix(String keyPrefix) {
-		Set<String> keys = redisTemplate.keys(keyPrefix + "*");
-		return Arrays.asList(keys.toArray(new String[0]));
+	// zSet 操作
+
+	public void  zSet() {
+
 	}
 
-	/**
-	 * 通过 keys 集合 获取 所以 相对于的 values
-	 * @param keys
-	 * @return
-	 */
-	public List<String> multiGet(List<String> keys) {
-		 return redisTemplate.opsForValue().multiGet(keys);
+	public void zGet() {
+
 	}
 
 }
