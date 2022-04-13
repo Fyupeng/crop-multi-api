@@ -19,13 +19,19 @@ public class RedisUtils {
 
     public static final String IS_VIEW = CROP + ":" + "isView";
 
-    public static final String VIEW_COUNT = CROP + ":" + "viewCount";
+    public static final String VIEW_COUNT = CROP + ":" + "view-count";
 
-    public static final String SEARCH_HISTORY = CROP + ":" + "searchHistory";
+    public static final String SEARCH_HISTORY = CROP + ":" + "search-history";
+
+    public static final String SEARCH_SCORE = CROP + ":" + "search-score";
 
 
     public static String getUserRedisSession(String userId) {
         return USER_REDIS_SESSION + ":" + userId;
+    }
+
+    public static String getAdminRedisSession(String userId) {
+        return ADMIN_REDIS_SESSION + ":" + userId;
     }
 
     public static String getIdView(String id, HttpServletRequest request) {
@@ -42,6 +48,18 @@ public class RedisUtils {
 
     public static String getSearchHistoryKey(String userId) {
         return SEARCH_HISTORY + ":" + userId;
+    }
+
+    public static String getSearchHistoryKeyWithSearchKey(String userId, String key) {
+        return SEARCH_HISTORY + ":" + userId + ":" + key;
+    }
+
+    public static String getSearchScoreKey() {
+        return SEARCH_SCORE;
+    }
+
+    public static String getSearchScoreKeyWithSearchKey(String key) {
+        return SEARCH_SCORE + ":" + key;
     }
 
 
