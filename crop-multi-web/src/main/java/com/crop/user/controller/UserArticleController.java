@@ -5,11 +5,13 @@ import com.crop.pojo.vo.ArticleVO;
 import com.crop.service.*;
 import com.crop.utils.CropJSONResult;
 import com.crop.utils.PagedResult;
+import com.crop.utils.RedisUtils;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.n3r.idworker.utils.RequestAddr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,23 +40,23 @@ public class UserArticleController extends BasicController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private CommentService commentService;
-
-    @Autowired
-    private TagService tagService;
-
 
     @PostMapping(value = "/getAllArticles")
     @ApiOperation(value = "查找文章信息", notes = "查找文章信息的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "key", value = "关键字", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "page", value = "当前页", required = false, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "页数", required = false, dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "pageSize", value = "页数", required = false, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "userId", value = "用户id", required = false, dataType = "String", paramType = "query")
     })
-    public CropJSONResult getAllArticles(String key, Integer page, Integer pageSize) {
+    public CropJSONResult getAllArticles(String key, Integer page, Integer pageSize, String userId) {
         if (StringUtils.isBlank(key)) {
             return CropJSONResult.errorMsg("关键字不能为空");
+        }
+
+        boolean addTrue = addSearchHistory(userId, key);
+        if (!addTrue) {
+            log.info("已存在key：{}",key);
         }
 
         //前端不传该参时会初始化
@@ -88,7 +90,160 @@ public class UserArticleController extends BasicController {
         PagedResult pageResult = articleService.queryArticleSelective(article, page,pageSize);
 
         return CropJSONResult.ok(pageResult);
+    }
 
+
+    @PostMapping(value = "/getSearchHistory")
+    @ApiOperation(value = "获取搜索历史记录", notes = "获取搜索历史记录的接口")
+    @ApiImplicitParam(name = "userId",  value = "用户id",required = true, dataType = "String", paramType = "query")
+    public CropJSONResult getSearchHistory(String userId) {
+        List<String> searchHistoryList = querySearchHistory(userId);
+        return CropJSONResult.ok(searchHistoryList);
+    }
+
+    @PostMapping(value = "/removeHistory")
+    @ApiOperation(value = "删除搜索历史记录", notes = "删除搜索历史记录的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId",  value = "用户id",required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "searchKey",  value = "搜索关键字",required = true, dataType = "String", paramType = "query")
+    })
+    public CropJSONResult removeHistory(String userId, String searchKey) {
+        Long history = delSearchHistory(userId, searchKey);
+        return CropJSONResult.ok(history);
+    }
+
+    /**
+     * 添加个人 历史数据
+     * @param userId
+     * @param searchKey
+     * @return false: 已存在 - true : 添加成功
+     */
+    private boolean addSearchHistory(String userId, String searchKey) {
+        String searchHistoryKey = RedisUtils.getSearchHistoryKey(userId);
+        boolean keyIsExist = redis.hasKey(searchHistoryKey);
+        if (keyIsExist) {
+            String hk = redis.hget(searchHistoryKey, searchKey);
+            if (hk != null) {
+                return false;
+            } else {
+                redis.hset(searchHistoryKey, searchKey, "1");
+            }
+
+        } else {
+            redis.hset(searchHistoryKey, searchKey, "1");
+        }
+        return true;
+    }
+
+    /**
+     * 获取个人 历史数据
+     * @param userId
+     * @return null : 没有数据 - List<String> ${ketList}
+     */
+    private List<String> querySearchHistory(String userId) {
+        String searchHistoryKey = RedisUtils.getSearchHistoryKey(userId);
+        boolean keyExist = redis.hasKey(searchHistoryKey);
+        if (keyExist) {
+            Cursor<Map.Entry<Object, Object>> cursor = redis.hscan(searchHistoryKey);
+            List<String> keyList = new ArrayList<>();
+            while (cursor.hasNext()) {
+                Map.Entry<Object, Object> current = cursor.next();
+                String key = current.getKey().toString();
+                keyList.add(key);
+            }
+            return keyList;
+        }
+        return null;
+    }
+    /**
+     * 删除个人 历史数据
+     * @param userId
+     * @param searchKey
+     * @return
+     */
+    private Long delSearchHistory(String userId, String searchKey) {
+        String searchHistoryKey = RedisUtils.getSearchHistoryKey(userId);
+        return redis.hdel(searchHistoryKey, searchKey);
+    }
+
+    @PostMapping(value = "/getRecommendArticles")
+    @ApiOperation(value = "查找文章信息", notes = "查找文章信息的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "key", value = "关键字", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "当前页", required = false, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "pageSize", value = "页数", required = false, dataType = "String", paramType = "query")
+    })
+    public CropJSONResult getRecommendArticles(String key, Integer page, Integer pageSize) {
+        if (StringUtils.isBlank(key)) {
+            return CropJSONResult.errorMsg("关键字不能为空");
+        }
+
+        //前端不传该参时会初始化
+        if(page == null){
+            page = 1;
+        }
+        //前端不传该参时会初始化
+        if(pageSize == null){
+            pageSize = ARTICLE_PAGE_SIZE;
+        }
+
+
+
+        return CropJSONResult.ok(null);
+
+
+    }
+
+    @PostMapping(value = "/getLatestdArticles")
+    @ApiOperation(value = "查找文章信息", notes = "查找文章信息的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "key", value = "关键字", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "当前页", required = false, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "pageSize", value = "页数", required = false, dataType = "String", paramType = "query")
+    })
+    public CropJSONResult getLatestdArticles(String key, Integer page, Integer pageSize) {
+        if (StringUtils.isBlank(key)) {
+            return CropJSONResult.errorMsg("关键字不能为空");
+        }
+
+        //前端不传该参时会初始化
+        if(page == null){
+            page = 1;
+        }
+        //前端不传该参时会初始化
+        if(pageSize == null){
+            pageSize = ARTICLE_PAGE_SIZE;
+        }
+
+
+
+        return CropJSONResult.ok(null);
+
+    }
+
+    @PostMapping(value = "/getHotpotdArticles")
+    @ApiOperation(value = "查找文章信息", notes = "查找文章信息的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "key", value = "关键字", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "page", value = "当前页", required = false, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "pageSize", value = "页数", required = false, dataType = "String", paramType = "query")
+    })
+    public CropJSONResult getHotpotdArticles(String key, Integer page, Integer pageSize) {
+        if (StringUtils.isBlank(key)) {
+            return CropJSONResult.errorMsg("关键字不能为空");
+        }
+
+        //前端不传该参时会初始化
+        if(page == null){
+            page = 1;
+        }
+        //前端不传该参时会初始化
+        if(pageSize == null){
+            pageSize = ARTICLE_PAGE_SIZE;
+        }
+
+
+        return CropJSONResult.ok(null);
 
     }
 
@@ -97,10 +252,10 @@ public class UserArticleController extends BasicController {
     @ApiOperation(value = "获取文章详细信息", notes = "获取文章详细信息的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "articleId", value = "文章id", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "request",value = "请求", dataType = "HttpServletRequest", readOnly = true)
+            //@ApiImplicitParam(name = "request",value = "请求", dataType = "HttpServletRequest", readOnly = true)
     })
 
-    public CropJSONResult getArticleDetail(String articleId, HttpServletRequest request) {
+    public CropJSONResult getArticleDetail(String articleId, @ApiParam(hidden = true)HttpServletRequest request) {
 
         if (StringUtils.isBlank(articleId)) {
             return CropJSONResult.errorMsg("文章id不能为空");
@@ -110,25 +265,25 @@ public class UserArticleController extends BasicController {
         article.setId(articleId);
 
         ArticleVO articleVO = articleService.queryArticleDetail(articleId);
-
-        String userView = IS_VIEW + ":" + articleVO.getId() + ":" + RequestAddr.getClientIpAddress(request);
-
-        String userViewCount = VIEW_COUNT + ":" + articleVO.getId();
-
-        // 文章 id 不存在 或 用户短时间 已 访问，redis.get(userView) 返回值是 对象，不能 通过 ""判断
-        if (articleVO == null || redis.get(userView) != null) {
-            return CropJSONResult.ok(articleVO);
+        // 文章 id 不存在
+        if (articleVO == null) {
+            return CropJSONResult.ok("articleId不存在");
         }
 
+        String articleView = RedisUtils.getIdView(articleVO.getId(), request);
+        String articleViewCount = RedisUtils.getIdViewCount(articleVO.getId());
+        //用户短时间 已 访问，redis.get(userView) 返回值是 对象，不能 通过 ""判断
+        if (redis.get(articleView) != null) {
+            return CropJSONResult.ok(articleVO);
+        }
         /**
          * 统计量 一小时 内 同一个 ip 地址 只能算 1 次 阅读
          */
-        redis.set(userView, "1", 60 * 60);
-
+        redis.set(articleView, "1", 60 * 60);
         /**
-         * userViewCount 如果 未 初始化，redis 会 初始化为 0
+         * articleViewCount 如果 未 初始化，redis 会 初始化为 0
          */
-        redis.incr(userViewCount,1);
+        redis.incr(articleViewCount,1);
 
         return CropJSONResult.ok(articleVO);
     }
