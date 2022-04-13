@@ -11,6 +11,7 @@ import com.crop.service.ClassficationService;
 import com.crop.service.UserService;
 import com.crop.utils.CropJSONResult;
 import com.crop.utils.PagedResult;
+import com.crop.utils.RedisUtils;
 import com.sun.scenario.effect.Crop;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -29,6 +30,8 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static com.crop.utils.RedisUtils.VIEW_COUNT;
 
 /**
  * @Auther: fyp
@@ -170,17 +173,19 @@ public class AdminArticleController extends BasicController {
             /**
              * 定时任务 - 更新 阅读量
              */
-            List<String> keys = redis.getKeysByPrefix(VIEW_COUNT + "*");
+            // 获取 所有用户 对Id的 阅读量
+            String viewCount = RedisUtils.getViewCount();
+            List<String> keys = redis.getKeysByPrefix(viewCount);
             /**
-             * key格式: "viewCount:2204057942HA6Z7C"
+             * key格式: "crop:viewCount:2204057942HA6Z7C"
              * 获取 articleId : 2204057942HA6Z7C
              */
             List<String> articleIdKeys = new ArrayList<>();
             Map<String, String> articleMap = new HashMap<>();
 
             for (String k : keys) {
-                // 匹配 第一个 : 到 最后一个 :
-                String tempArticleId = k.substring(k.indexOf(":") + 1);
+                // 匹配 最后一个 : 到结束
+                String tempArticleId = k.substring(k.lastIndexOf(":") + 1);
                 articleIdKeys.add(tempArticleId);
             }
 
@@ -194,7 +199,7 @@ public class AdminArticleController extends BasicController {
 
         }, initialDelay, fiveMinute, TimeUnit.MILLISECONDS);
 
-        return CropJSONResult.errorMsg("任务启动成功");
+        return CropJSONResult.ok("任务启动成功");
 
     }
 
