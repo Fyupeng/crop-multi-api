@@ -1,15 +1,12 @@
 package com.crop.service.impl;
 
 import com.crop.mapper.ArticleRepository;
-import com.crop.mapper.Articles2tagsMapper;
 import com.crop.mapper.ClassficationMapper;
 import com.crop.mapper.UserInfoMapper;
 import com.crop.pojo.Article;
-import com.crop.pojo.Articles2tags;
 import com.crop.pojo.Classfication;
 import com.crop.pojo.UserInfo;
 import com.crop.pojo.vo.ArticleVO;
-import com.crop.pojo.vo.UserInfoVO;
 import com.crop.service.ArticleService;
 import com.crop.utils.PagedResult;
 import com.crop.utils.TimeAgoUtils;
@@ -18,10 +15,14 @@ import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sound.midi.spi.SoundbankReader;
 import java.util.*;
 
 /**
@@ -37,6 +38,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Autowired
     private UserInfoMapper userinfoMapper;
@@ -136,7 +140,6 @@ public class ArticleServiceImpl implements ArticleService {
              * 查询量 太大，流量大，而且 用户 只是在 查询而已，不需要评论 和 内容
              */
             articleVO.setContent(null);
-            articleVO.setCommentCounts(null);
             artileVOList.add(articleVO);
         }
 
@@ -216,6 +219,88 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeArticle(String articleId) {
         articleRepository.delete(articleId);
+    }
+
+
+    @Override
+    public PagedResult queryArticleByTime(Long timeDifference, Integer page, Integer pageSize) {
+
+        //分页查询对象
+        if(page <= 0){
+            page = 1;
+        }
+        // page 分页 在 mongodb 中是 从 0 开始的
+        page = page - 1;
+
+        if(pageSize <= 0){
+            pageSize = 10;
+        }
+
+        // 当前时间
+        Long now = System.currentTimeMillis();
+        Long time = now - timeDifference;
+        // 一周前的 日期
+        Date oneWekkAgodate = new Date(time);
+
+        Query queryCurrentPage = new Query();
+        Query queryAll = new Query();
+
+        queryCurrentPage.addCriteria(Criteria.where("createTime").gt(oneWekkAgodate));
+        queryAll.addCriteria(Criteria.where("createTime").gt(oneWekkAgodate));
+
+        // 倒序 时间
+        Sort sort = new Sort(Sort.Direction.DESC, "createTime");
+        queryCurrentPage.with(sort);
+        // 分页
+        PageRequest pageRequest = new PageRequest(page, pageSize);
+        queryCurrentPage.with(pageRequest);
+
+        //匹配相近的时间戳即为 最近的发布 文章，时间戳设置
+        List<Article> currentPageArticleList = mongoTemplate.find(queryCurrentPage, Article.class);
+        // 不排序和分页
+        List<Article> allArticleList = mongoTemplate.find(queryCurrentPage, Article.class);
+
+        List<ArticleVO> artileVOList = new ArrayList<>();
+
+        // 时间处理
+        for (Article ac : currentPageArticleList) {
+            String createTimeAgo = TimeAgoUtils.format(ac.getCreateTime());
+            String updateTimeAgo = TimeAgoUtils.format(ac.getUpdateTime());
+            ArticleVO articleVO = new ArticleVO();
+            BeanUtils.copyProperties(ac, articleVO);
+            articleVO.setCreateTimeAgoStr(createTimeAgo);
+            articleVO.setUpdateTimeAgoStr(updateTimeAgo);
+            /**
+             * 查询量 太大，流量大，而且 用户 只是在 查询而已，不需要评论 和 内容
+             */
+            articleVO.setContent(null);
+            artileVOList.add(articleVO);
+        }
+
+        // 总记录数
+        long records = allArticleList.size();
+        /**
+         *   1. 页大小 小于 总记录数
+         *    - 最后一页是 整数
+         *      总页数 = records / pageSize
+         *   - 最后一页不是整页
+         *    总页数 = records / pageSize
+         *   2. 页大小 大于等于 总记录数
+         *      总页数 = 1
+         */
+        int pages = 1;
+        if (pageSize < records) {
+            pages = (int) (records / pageSize);
+        }
+        //else {
+        //    pages = 1;
+        //}
+        PagedResult pagedResult = new PagedResult();
+        pagedResult.setRows(artileVOList);
+        pagedResult.setRecords(records);
+        pagedResult.setTotal(pages);
+
+        return pagedResult;
     }
 
 
