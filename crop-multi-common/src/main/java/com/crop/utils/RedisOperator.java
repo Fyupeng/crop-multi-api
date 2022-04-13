@@ -58,16 +58,6 @@ public class RedisOperator {
 	}
 
 	/**
-	 * 实现命令：INCR key，增加key一次
-	 *
-	 * @param key
-	 * @return
-	 */
-	public long incr(String key, long delta) {
-		return redisTemplate.opsForValue().increment(key, delta);
-	}
-
-	/**
 	 * 实现命令：KEYS pattern，查找所有符合给定模式 pattern的 key
 	 */
 	public Set<String> keys(String pattern) {
@@ -93,14 +83,7 @@ public class RedisOperator {
 		return Arrays.asList(keys.toArray(new String[0]));
 	}
 
-	/**
-	 * 通过 keys 集合 获取 所以 相对于的 values
-	 * @param keys
-	 * @return
-	 */
-	public List<String> multiGet(List<String> keys) {
-		return redisTemplate.opsForValue().multiGet(keys);
-	}
+
 
 
 	// String（字符串）
@@ -134,6 +117,25 @@ public class RedisOperator {
 	 */
 	public String get(String key) {
 		return (String)redisTemplate.opsForValue().get(key);
+	}
+
+	/**
+	 * 实现命令：INCR key，增加key一次
+	 *
+	 * @param key
+	 * @return
+	 */
+	public long incr(String key, long delta) {
+		return redisTemplate.opsForValue().increment(key, delta);
+	}
+
+	/**
+	 * 通过 keys 集合 获取 所以 相对于的 values
+	 * @param keys
+	 * @return
+	 */
+	public List<String> multiGet(List<String> keys) {
+		return redisTemplate.opsForValue().multiGet(keys);
 	}
 
 	// Hash（哈希表）
@@ -219,13 +221,25 @@ public class RedisOperator {
 
 	// zSet 操作
 
-	public void  zSet() {
-
+	public boolean  zset(String key, String value, double score) {
+		return redisTemplate.opsForZSet().add(key, value, score);
 	}
 
-	public void zGet() {
-
+	public Double zScore(String key, String value) {
+		return redisTemplate.opsForZSet().score(key, value);
 	}
+
+	public Double zIncrementScore(String key, String value, double score) {
+		return redisTemplate.opsForZSet().incrementScore(key, value, score);
+	}
+
+	public Set<String> zRangeByScore(String key, double min, double max) {
+		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
+	}
+	public Set<String> zRevRangeByScore(String key, double min, double max) {
+		return redisTemplate.opsForZSet().reverseRangeByScore(key, min, max);
+	}
+
 
 }
 
