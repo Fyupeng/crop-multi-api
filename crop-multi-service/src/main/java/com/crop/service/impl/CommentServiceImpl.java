@@ -1,12 +1,16 @@
 package com.crop.service.impl;
 
 import com.crop.mapper.CommentRepository;
+import com.crop.mapper.UserInfoMapper;
 import com.crop.pojo.Article;
 import com.crop.pojo.Comment;
+import com.crop.pojo.UserInfo;
+import com.crop.pojo.vo.CommentVO;
 import com.crop.service.CommentService;
 import com.crop.utils.PagedResult;
 import io.swagger.annotations.ApiImplicitParam;
 import org.n3r.idworker.Sid;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -29,6 +33,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private UserInfoMapper userInfoMapper;
 
     @Autowired
     private Sid sid;
@@ -76,6 +83,24 @@ public class CommentServiceImpl implements CommentService {
         int pages = all.getTotalPages();
         long total = all.getTotalElements();
         List<Comment> content = all.getContent();
+
+        // po -> vo 永久层对象 - 视图层对象
+        for (Comment ct : content) {
+            CommentVO commentVO = new CommentVO();
+            BeanUtils.copyProperties(ct, commentVO);
+
+            // nickName、avatar
+            String fromUserId = ct.getFromUserId();
+            String toUserId = ct.getToUserId();
+            UserInfo fromUserInfo = userInfoMapper.selectByPrimaryKey(fromUserId);
+            UserInfo toUserInfo = userInfoMapper.selectByPrimaryKey(toUserId);
+
+            commentVO.setFromUserNickName(fromUserInfo.getNickname());
+            commentVO.setFromUserAvatar(fromUserInfo.getAvatar());
+            commentVO.setToUserNickName(toUserInfo.getNickname());
+            // 防止 被恶意使用
+            commentVO.setToUserId(null);
+        }
 
         PagedResult pagedResult = new PagedResult();
         // 页数
