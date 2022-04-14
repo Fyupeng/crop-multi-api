@@ -10,6 +10,9 @@ import com.crop.pojo.vo.ArticleVO;
 import com.crop.service.ArticleService;
 import com.crop.utils.PagedResult;
 import com.crop.utils.TimeAgoUtils;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import jdk.management.resource.internal.TotalResourceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
@@ -90,7 +93,7 @@ public class ArticleServiceImpl implements ArticleService {
         if(page <= 0){
             page = 1;
         }
-        // page 分页 在 mongodb 中是 从 0 开始的
+        // page 分页 在 mongodb 中是 从 0 开始的，转换为物理位置
         page = page - 1;
 
         if(pageSize <= 0){
@@ -156,8 +159,8 @@ public class ArticleServiceImpl implements ArticleService {
         //pagedResult.setRows(content); 原始数据
         pagedResult.setRows(artileVOList);
 
-        // 设置 当前页
-        pagedResult.setPage(page);
+        // 设置 当前页,转换为逻辑位置
+        pagedResult.setPage(page+1);
         // 设置 总页数
         pagedResult.setTotal(pages);
 
@@ -229,7 +232,7 @@ public class ArticleServiceImpl implements ArticleService {
         if(page <= 0){
             page = 1;
         }
-        // page 分页 在 mongodb 中是 从 0 开始的
+        // page 分页 在 mongodb 中是 从 0 开始的，转换为 物理位置
         page = page - 1;
 
         if(pageSize <= 0){
@@ -242,23 +245,27 @@ public class ArticleServiceImpl implements ArticleService {
         // 一周前的 日期
         Date oneWekkAgodate = new Date(time);
 
-        Query queryCurrentPage = new Query();
         Query queryAll = new Query();
+        Query queryCurrentPage = new Query();
 
-        queryCurrentPage.addCriteria(Criteria.where("createTime").gt(oneWekkAgodate));
         queryAll.addCriteria(Criteria.where("createTime").gt(oneWekkAgodate));
+        queryCurrentPage.addCriteria(Criteria.where("createTime").gt(oneWekkAgodate));
 
         // 倒序 时间
         Sort sort = new Sort(Sort.Direction.DESC, "createTime");
+        queryAll.with(sort);
         queryCurrentPage.with(sort);
-        // 分页
         PageRequest pageRequest = new PageRequest(page, pageSize);
         queryCurrentPage.with(pageRequest);
+        // 分页
 
-        //匹配相近的时间戳即为 最近的发布 文章，时间戳设置
+        /**
+         * PageHelper 不支持 mongodb 查询
+         */
+        //PageHelper.startPage(page, pageSize);
+        List<Article> allArticleList = mongoTemplate.find(queryAll, Article.class);
         List<Article> currentPageArticleList = mongoTemplate.find(queryCurrentPage, Article.class);
-        // 不排序和分页
-        List<Article> allArticleList = mongoTemplate.find(queryCurrentPage, Article.class);
+
 
         List<ArticleVO> artileVOList = new ArrayList<>();
 
@@ -277,28 +284,25 @@ public class ArticleServiceImpl implements ArticleService {
             artileVOList.add(articleVO);
         }
 
-        // 总记录数
         long records = allArticleList.size();
-        /**
-         *   1. 页大小 小于 总记录数
-         *    - 最后一页是 整数
-         *      总页数 = records / pageSize
-         *   - 最后一页不是整页
-         *    总页数 = records / pageSize
-         *   2. 页大小 大于等于 总记录数
-         *      总页数 = 1
-         */
-        int pages = 1;
+        int total = 1;
+        // 每页 大小 小于 总记录数 时才需要分页
         if (pageSize < records) {
-            pages = (int) (records / pageSize);
+            // 最后一页 还有 数据
+            if (records % pageSize != 0) {
+                total += records / pageSize;
+            } else {
+                total = (int) (records / pageSize);
+            }
         }
-        //else {
-        //    pages = 1;
-        //}
+
         PagedResult pagedResult = new PagedResult();
-        pagedResult.setRows(artileVOList);
+        pagedResult.setTotal(total);
         pagedResult.setRecords(records);
-        pagedResult.setTotal(pages);
+        pagedResult.setRows(artileVOList);
+        // page 最后转换为 逻辑位置
+        pagedResult.setPage(page+1);
+
 
         return pagedResult;
     }
