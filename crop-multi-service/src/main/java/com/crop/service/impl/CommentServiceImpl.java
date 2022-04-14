@@ -8,6 +8,7 @@ import com.crop.pojo.UserInfo;
 import com.crop.pojo.vo.CommentVO;
 import com.crop.service.CommentService;
 import com.crop.utils.PagedResult;
+import com.crop.utils.TimeAgoUtils;
 import io.swagger.annotations.ApiImplicitParam;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -85,26 +87,41 @@ public class CommentServiceImpl implements CommentService {
         long total = all.getTotalElements();
         List<Comment> content = all.getContent();
 
+        List<CommentVO> commentVOList = new ArrayList<>();
         // po -> vo 永久层对象 - 视图层对象
         for (Comment ct : content) {
             CommentVO commentVO = new CommentVO();
             BeanUtils.copyProperties(ct, commentVO);
 
-            // nickName、avatar
-            String fromUserId = ct.getFromUserId();
-            String toUserId = ct.getToUserId();
-            UserInfo fromUserInfo = userInfoMapper.selectByPrimaryKey(fromUserId);
-            UserInfo toUserInfo = userInfoMapper.selectByPrimaryKey(toUserId);
+            System.out.println(ct);
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            // fromUser
+            String fromUserId = ct.getFromUserId();
+            UserInfo userInfoWithFromUserId = new UserInfo();
+            userInfoWithFromUserId.setUserId(fromUserId);
+            UserInfo fromUserInfo = userInfoMapper.selectOne(userInfoWithFromUserId);
+            commentVO.setFromUserNickName(fromUserInfo.getNickname());
+            commentVO.setFromUserAvatar(fromUserInfo.getAvatar());
+
+            // toUser
+            String toUserId = ct.getToUserId();
+            if (toUserId != null) {
+                UserInfo userInfoWithToUserId = new UserInfo();
+                userInfoWithToUserId.setUserId(toUserId);
+                UserInfo toUserInfo = userInfoMapper.selectOne(userInfoWithToUserId);
+                commentVO.setToUserNickName(toUserInfo == null ? null : toUserInfo.getNickname());
+            }
+
+            //time
+            String createTimeAgo = TimeAgoUtils.format(ct.getCreateTime());
+            commentVO.setCreateTimeAgo(createTimeAgo);
+            SimpleDateFormat sdf = new SimpleDateFormat();
             String normalCreateTime = sdf.format(ct.getCreateTime());
             commentVO.setNormalCreateTime(normalCreateTime);
 
-            commentVO.setFromUserNickName(fromUserInfo.getNickname());
-            commentVO.setFromUserAvatar(fromUserInfo.getAvatar());
-            commentVO.setToUserNickName(toUserInfo.getNickname());
             // 防止 被恶意使用
             commentVO.setToUserId(null);
+            commentVOList.add(commentVO);
         }
 
         PagedResult pagedResult = new PagedResult();
@@ -115,7 +132,7 @@ public class CommentServiceImpl implements CommentService {
         // 总记录数
         pagedResult.setRecords(total);
         // 内容列表
-        pagedResult.setRows(content);
+        pagedResult.setRows(commentVOList);
 
         return pagedResult;
     }
