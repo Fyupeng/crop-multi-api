@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -94,6 +95,10 @@ public class CommentServiceImpl implements CommentService {
             String toUserId = ct.getToUserId();
             UserInfo fromUserInfo = userInfoMapper.selectByPrimaryKey(fromUserId);
             UserInfo toUserInfo = userInfoMapper.selectByPrimaryKey(toUserId);
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            String normalCreateTime = sdf.format(ct.getCreateTime());
+            commentVO.setNormalCreateTime(normalCreateTime);
 
             commentVO.setFromUserNickName(fromUserInfo.getNickname());
             commentVO.setFromUserAvatar(fromUserInfo.getAvatar());

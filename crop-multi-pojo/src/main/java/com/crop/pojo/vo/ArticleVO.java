@@ -65,6 +65,9 @@ public class ArticleVO implements Comparable {
      */
     private Integer receiveLikeCounts;
 
+    private String normalCreateTime;
+    private String normalUpdateTime;
+
     private String createTimeAgoStr;
     private String updateTimeAgoStr;
     private String classficationName;
@@ -197,6 +200,22 @@ public class ArticleVO implements Comparable {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public String getNormalCreateTime() {
+        return normalCreateTime;
+    }
+
+    public void setNormalCreateTime(String normalCreateTime) {
+        this.normalCreateTime = normalCreateTime;
+    }
+
+    public String getNormalUpdateTime() {
+        return normalUpdateTime;
+    }
+
+    public void setNormalUpdateTime(String normalUpdateTime) {
+        this.normalUpdateTime = normalUpdateTime;
     }
 
     @Override

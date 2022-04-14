@@ -22,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.SimpleFormatter;
 
 /**
  * @Auther: fyp
@@ -133,6 +135,11 @@ public class ArticleServiceImpl implements ArticleService {
             String updateTimeAgo = TimeAgoUtils.format(ac.getUpdateTime());
             ArticleVO articleVO = new ArticleVO();
             BeanUtils.copyProperties(ac, articleVO);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            String normalCreateTime = sdf.format(ac.getCreateTime());
+            String normalUpdateTime = sdf.format(ac.getUpdateTime());
+            articleVO.setNormalCreateTime(normalCreateTime);
+            articleVO.setNormalUpdateTime(normalUpdateTime);
             articleVO.setCreateTimeAgoStr(createTimeAgo);
             articleVO.setUpdateTimeAgoStr(updateTimeAgo);
             /**
@@ -189,6 +196,12 @@ public class ArticleServiceImpl implements ArticleService {
             articleVO.setAvatar(userInfo.getAvatar());
             articleVO.setNickName(userInfo.getNickname());
             articleVO.setClassficationName(classfication.getName());
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            String normalCreateTime = sdf.format(result.getCreateTime());
+            String normalUpdateTime = sdf.format(result.getUpdateTime());
+            articleVO.setNormalCreateTime(normalCreateTime);
+            articleVO.setNormalUpdateTime(normalUpdateTime);
 
             articleVO.setCreateTimeAgoStr(createTimeAgo);
             articleVO.setUpdateTimeAgoStr(updateTimeAgo);
