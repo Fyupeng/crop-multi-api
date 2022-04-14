@@ -47,7 +47,7 @@ public class UserArticleController extends BasicController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "searchKey", value = "搜索关键字", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "page", value = "当前页", required = false, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "页数", required = false, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "pageSize", value = "页大小", required = false, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
     })
     public CropJSONResult getAllArticles(String searchKey, Integer page, Integer pageSize, String userId) {
@@ -123,13 +123,13 @@ public class UserArticleController extends BasicController {
      * @param pageSize
      * @return
      */
-    @PostMapping(value = "/getLatestArticles")
+    @PostMapping(value = "/getRecentArticles")
     @ApiOperation(value = "获取最近文章", notes = "获取最近文章的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "当前页", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "pageSize", value = "页大小", dataType = "String", paramType = "query"),
     })
-    public CropJSONResult getLatestArticles(Integer page, Integer pageSize) {
+    public CropJSONResult getRecentArticles(Integer page, Integer pageSize) {
 
         //前端不传该参时会初始化
         if(page == null){
@@ -160,7 +160,7 @@ public class UserArticleController extends BasicController {
     @ApiOperation(value = "获取推荐文章", notes = "获取推荐文章的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "当前页", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "页数", dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "pageSize", value = "页大小", dataType = "String", paramType = "query")
     })
     public CropJSONResult getHotArticles(Integer page, Integer pageSize) {
 
