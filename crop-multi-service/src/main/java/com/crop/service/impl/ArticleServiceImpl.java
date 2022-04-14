@@ -216,12 +216,10 @@ public class ArticleServiceImpl implements ArticleService {
     public void multiUpdateArticleReadCounts(List<String> articleIdKeys, Map<String, String> articleMap) {
         for (String articleId : articleIdKeys) {
             Article oldArticle = articleRepository.findOne(articleId);
-            System.out.println(oldArticle);
             // 获取 articleId 对应的 readCounts
             String readCounts = articleMap.get(articleId);
             // 更新 readCounts
             oldArticle.setReadCounts(Integer.parseInt(readCounts));
-            System.out.println(oldArticle);
 
             articleRepository.save(oldArticle);
         }
