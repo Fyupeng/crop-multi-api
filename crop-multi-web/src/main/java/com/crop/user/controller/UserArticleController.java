@@ -74,6 +74,9 @@ public class UserArticleController extends BasicController {
             return CropJSONResult.ok(sensitiveWord);
         }
 
+        // 进行 热度 维护
+        incrementArticleScore(searchKey);
+
         boolean addTrue = addSearchHistory(userId, searchKey);
         if (!addTrue) {
             log.info("已存在key：{}",searchKey);
@@ -112,11 +115,19 @@ public class UserArticleController extends BasicController {
         return CropJSONResult.ok(pageResult);
     }
 
+    /**
+     * 策略：
+     *      1. 查询范围：最近一周 数据
+     *      2. 排序方式：时间 最近排序
+     * @param page
+     * @param pageSize
+     * @return
+     */
     @PostMapping(value = "/getLatestArticles")
     @ApiOperation(value = "获取最近文章", notes = "获取最近文章的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "page", value = "当前页", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "页数", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "pageSize", value = "页大小", dataType = "String", paramType = "query"),
     })
     public CropJSONResult getLatestArticles(Integer page, Integer pageSize) {
 
@@ -137,37 +148,33 @@ public class UserArticleController extends BasicController {
         return CropJSONResult.ok(pageResult);
     }
 
+    /**
+     * 策略：
+     *      1. 更新频率： 每小时
+     *      2. 更新策略： 用户搜索率最高（过滤敏感信息）
+     * @param page
+     * @param pageSize
+     * @return
+     */
     @PostMapping(value = "/getHotArticles")
     @ApiOperation(value = "获取推荐文章", notes = "获取推荐文章的接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "searchKey", value = "搜索关键字", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "page", value = "当前页", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "页数", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "pageSize", value = "页数", dataType = "String", paramType = "query")
     })
-    public CropJSONResult getHotArticles(Integer page, Integer pageSize, String userId) {
-        if (StringUtils.isBlank(userId)) {
-            return CropJSONResult.errorMsg("用户id不能为空");
-        }
-
-        boolean userIsExist = userService.queryUserIdIsExist(userId);
-        if (!userIsExist) {
-            return CropJSONResult.errorMsg("用户id不存在");
-        }
+    public CropJSONResult getHotArticles(Integer page, Integer pageSize) {
 
         List<String> hotSearchKeyList = getHotSearchKey(null, null);
-        // 随机从十条数据中拿出一条来搜索
-        Random random = new Random();
-        int index = random.nextInt(hotSearchKeyList.size());
-        String searchKey = hotSearchKeyList.get(index);
-
-        // 进行 热度 维护
-        incrementArticleScore(searchKey);
-
-        boolean addTrue = addSearchHistory(userId, searchKey);
-        if (!addTrue) {
-            log.info("已存在key：{}",searchKey);
-        }
+        //// 随机从十条数据中拿出一条来搜索
+        //Random random = new Random();
+        //int index = random.nextInt(hotSearchKeyList.size());
+        /**
+         * 保证 1小时 之内查询的数据一致，1小时更新一次
+         */
+        int seed = Calendar.HOUR_OF_DAY;
+        // 保证 不越过 数组长度
+        seed %= hotSearchKeyList.size();
+        String searchKey = hotSearchKeyList.get(seed);
 
         //前端不传该参时会初始化
         if(page == null){
