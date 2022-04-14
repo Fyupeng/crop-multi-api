@@ -169,7 +169,6 @@ public class AdminArticleController extends BasicController {
         long initialDelay = 1 * 1000;
         long fiveMinute = 5 * 60 * 1000;
         executor.scheduleAtFixedRate(() -> {
-
             /**
              * 定时任务 - 更新 阅读量
              */
@@ -182,6 +181,8 @@ public class AdminArticleController extends BasicController {
              */
             List<String> articleIdKeys = new ArrayList<>();
             Map<String, String> articleMap = new HashMap<>();
+
+
 
             for (String k : keys) {
                 // 匹配 最后一个 : 到结束
@@ -196,6 +197,7 @@ public class AdminArticleController extends BasicController {
             }
 
             articleService.multiUpdateArticleReadCounts(articleIdKeys, articleMap);
+            log.info("完成一次周期任务 - 任务正常");
 
         }, initialDelay, fiveMinute, TimeUnit.MILLISECONDS);
 
