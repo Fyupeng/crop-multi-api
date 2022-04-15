@@ -57,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public PagedResult queryAllComments(String articleId, Integer page, Integer pageSize) {
+    public PagedResult queryAllComments(String articleId, Integer page, Integer pageSize, Integer sortNum) {
 
         //分页查询对象
         if(page <= 0){
@@ -79,7 +79,14 @@ public class CommentServiceImpl implements CommentService {
 
         Example<Comment> articleExample = Example.of(comment, exampleMatcher);
 
+        //mongodb数据中默认是 按时间正序排序（顺着时间走向排序、升序）
         Pageable pageable = new PageRequest(page, pageSize);
+
+        if (sortNum == 2) {
+            Sort sort = new Sort(Sort.Direction.DESC, "createTime");
+            pageable = new PageRequest(page, pageSize, sort);
+        }
+
 
         Page<Comment> all = commentRepository.findAll(articleExample, pageable);
 
@@ -92,8 +99,6 @@ public class CommentServiceImpl implements CommentService {
         for (Comment ct : content) {
             CommentVO commentVO = new CommentVO();
             BeanUtils.copyProperties(ct, commentVO);
-
-            System.out.println(ct);
 
             // fromUser
             String fromUserId = ct.getFromUserId();
@@ -115,7 +120,7 @@ public class CommentServiceImpl implements CommentService {
             //time
             String createTimeAgo = TimeAgoUtils.format(ct.getCreateTime());
             commentVO.setCreateTimeAgo(createTimeAgo);
-            SimpleDateFormat sdf = new SimpleDateFormat();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
             String normalCreateTime = sdf.format(ct.getCreateTime());
             commentVO.setNormalCreateTime(normalCreateTime);
 

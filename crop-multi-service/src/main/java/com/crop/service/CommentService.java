@@ -23,7 +23,7 @@ public interface CommentService {
 
     boolean updateComment(Comment comment);
 
-    PagedResult queryAllComments(String articleId, Integer page, Integer pageSize);
+    PagedResult queryAllComments(String articleId, Integer page, Integer pageSize, Integer sort);
 
     boolean queryCommentWithFatherCommentIsExist(String commentId);
 

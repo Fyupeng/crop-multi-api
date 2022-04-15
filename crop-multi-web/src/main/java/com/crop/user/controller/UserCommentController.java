@@ -47,9 +47,10 @@ public class UserCommentController extends BasicController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "articleId", value = "文章id", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "page", value = "当前页", dataType = "Integer", paramType = "query"),
-            @ApiImplicitParam(name = "pageSize", value = "页数", dataType = "Integer", paramType = "query")
+            @ApiImplicitParam(name = "pageSize", value = "页数", dataType = "Integer", paramType = "query"),
+            @ApiImplicitParam(name = "sort", value = "排序-1-缺省[正序时间]-2[倒序时间]", dataType = "Integer", paramType = "query")
     })
-    public CropJSONResult getAllComments(String articleId, Integer page, Integer pageSize) {
+    public CropJSONResult getAllComments(String articleId, Integer page, Integer pageSize, Integer sort) {
 
         if (StringUtils.isBlank(articleId)) {
             return CropJSONResult.errorMsg("文章id不能为空");
@@ -64,7 +65,11 @@ public class UserCommentController extends BasicController {
             pageSize = COMMENT_PAGE_SIZE;
         }
 
-        PagedResult pageResult = commentService.queryAllComments(articleId, page, pageSize);
+        if (sort == null) {
+            sort = 1;
+        }
+
+        PagedResult pageResult = commentService.queryAllComments(articleId, page, pageSize, sort);
 
         return CropJSONResult.ok(pageResult);
 
