@@ -22,6 +22,9 @@ public class UserInfo {
     @ApiModelProperty(value = "用户标识符[id]", required = true)
     private String userId;
 
+    @ApiModelProperty(value = "性别")
+    private Integer sex;
+
     /**
      * 我的头像，如果没有就默认给一张
      */
@@ -83,6 +86,22 @@ public class UserInfo {
      */
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    /**
+     * 获取性别
+     * @return
+     */
+    public Integer getSex() {
+        return sex;
+    }
+
+    /**
+     * 设置性别
+     * @param sex
+     */
+    public void setSex(Integer sex) {
+        this.sex = sex;
     }
 
     /**
