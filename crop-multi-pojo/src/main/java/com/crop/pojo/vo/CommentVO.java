@@ -51,6 +51,8 @@ public class CommentVO implements Serializable {
     private String toUserNickName;
     private String createTimeAgo;
 
+    private String fatherCommentContent;
+
     public CommentVO() {
     }
 
@@ -218,5 +220,13 @@ public class CommentVO implements Serializable {
 
     public void setNormalCreateTime(String normalCreateTime) {
         this.normalCreateTime = normalCreateTime;
+    }
+
+    public String getFatherCommentContent() {
+        return fatherCommentContent;
+    }
+
+    public void setFatherCommentContent(String fatherCommentContent) {
+        this.fatherCommentContent = fatherCommentContent;
     }
 }
