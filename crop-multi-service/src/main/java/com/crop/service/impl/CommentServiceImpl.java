@@ -109,14 +109,10 @@ public class CommentServiceImpl implements CommentService {
             commentVO.setFromUserAvatar(fromUserInfo.getAvatar());
             // fatherCommentContent
             String fatherCommentId = ct.getFatherCommentId();
-            Comment fatherComment = new Comment();
-
-            ExampleMatcher commentExampleMatcher = ExampleMatcher.matching()
-                    .withMatcher("fatherCommentId", ExampleMatcher.GenericPropertyMatchers.exact());
-
-            Example<Comment> commentExample = Example.of(fatherComment, commentExampleMatcher);
-            Comment one = commentRepository.findOne(commentExample);
-            commentVO.setFatherCommentContent(one.getComment());
+            if (fatherCommentId != null) {
+                Comment fatherComment = commentRepository.findOne(fatherCommentId);
+                commentVO.setFatherCommentContent(fatherComment.getComment());
+            }
             // toUser
             String toUserId = ct.getToUserId();
             if (toUserId != null) {
