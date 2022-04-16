@@ -72,12 +72,12 @@ public class CommentServiceImpl implements CommentService {
 
         ExampleMatcher matching = ExampleMatcher.matching();
 
-        ExampleMatcher exampleMatcher = matching.withMatcher("articleId", ExampleMatcher.GenericPropertyMatchers.exact());
+        ExampleMatcher articleExampleMatcher = matching.withMatcher("articleId", ExampleMatcher.GenericPropertyMatchers.exact());
 
         Comment comment = new Comment();
         comment.setArticleId(articleId);
 
-        Example<Comment> articleExample = Example.of(comment, exampleMatcher);
+        Example<Comment> articleExample = Example.of(comment, articleExampleMatcher);
 
         //mongodb数据中默认是 按时间正序排序（顺着时间走向排序、升序）
         Pageable pageable = new PageRequest(page, pageSize);
@@ -107,7 +107,16 @@ public class CommentServiceImpl implements CommentService {
             UserInfo fromUserInfo = userInfoMapper.selectOne(userInfoWithFromUserId);
             commentVO.setFromUserNickName(fromUserInfo.getNickname());
             commentVO.setFromUserAvatar(fromUserInfo.getAvatar());
+            // fatherCommentContent
+            String fatherCommentId = ct.getFatherCommentId();
+            Comment fatherComment = new Comment();
 
+            ExampleMatcher commentExampleMatcher = ExampleMatcher.matching()
+                    .withMatcher("fatherCommentId", ExampleMatcher.GenericPropertyMatchers.exact());
+
+            Example<Comment> commentExample = Example.of(fatherComment, commentExampleMatcher);
+            Comment one = commentRepository.findOne(commentExample);
+            commentVO.setFatherCommentContent(one.getComment());
             // toUser
             String toUserId = ct.getToUserId();
             if (toUserId != null) {
