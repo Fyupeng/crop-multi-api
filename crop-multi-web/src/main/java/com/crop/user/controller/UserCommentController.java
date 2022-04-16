@@ -93,6 +93,15 @@ public class UserCommentController extends BasicController {
             return CropJSONResult.errorMsg("评论内容comment不能为空");
         }
 
+        // fateherCommentId 是可以为 null 但是 不能是 空串
+        if (comment.getFatherCommentId() != null && StringUtils.isEmpty(comment.getFatherCommentId())) {
+            return CropJSONResult.errorMsg("不允许fatherCommentId为空串");
+        }
+        // toUserId 是可以为 null 但是 不能是 空串
+        if (comment.getToUserId() != null && StringUtils.isEmpty(comment.getToUserId())) {
+            return CropJSONResult.errorMsg("不允许toUserId为空串");
+        }
+
         if (StringUtils.isNotBlank(comment.getToUserId()) && comment.getToUserId().equals(comment.getFromUserId())) {
             return CropJSONResult.errorMsg("不能回复toUserId为fromUserId");
         }
