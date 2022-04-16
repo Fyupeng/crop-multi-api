@@ -173,6 +173,9 @@ public class UserArticleController extends BasicController {
          */
         int seed = Calendar.HOUR_OF_DAY;
         // 保证 不越过 数组长度
+        if (hotSearchKeyList.size() == 0) {
+            return CropJSONResult.ok("缓存数据库中无缓存");
+        }
         seed %= hotSearchKeyList.size();
         String searchKey = hotSearchKeyList.get(seed);
 
