@@ -69,7 +69,7 @@ public class TagServiceImpl implements TagService {
 
         List<Articles2tags> result = articles2tagsMapper.select(articles2tags);
 
-        return result == null ? false : true;
+        return result.size() == 0 ? false : true;
     }
 
     @Override
