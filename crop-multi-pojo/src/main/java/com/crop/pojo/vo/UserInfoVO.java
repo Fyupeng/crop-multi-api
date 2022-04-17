@@ -14,7 +14,7 @@ public class UserInfoVO {
      */
     private String userId;
 
-    private int sex;
+    private Integer sex;
 
     /**
      * 我的头像，如果没有就默认给一张
@@ -29,14 +29,14 @@ public class UserInfoVO {
     /**
      * 电话
      */
-    private Integer tel;
+    private String tel;
 
     /**
      * 邮箱
      */
     private String email;
 
-    private String desc;
+    private String description;
 
     /**
      * 获取主键
@@ -82,11 +82,11 @@ public class UserInfoVO {
         this.userToken = userToken;
     }
 
-    public int getSex() {
+    public Integer getSex() {
         return sex;
     }
 
-    public void setSex(int sex) {
+    public void setSex(Integer sex) {
         this.sex = sex;
     }
 
@@ -131,7 +131,7 @@ public class UserInfoVO {
      *
      * @return tel - 电话
      */
-    public Integer getTel() {
+    public String getTel() {
         return tel;
     }
 
@@ -140,7 +140,7 @@ public class UserInfoVO {
      *
      * @param tel 电话
      */
-    public void setTel(Integer tel) {
+    public void setTel(String tel) {
         this.tel = tel;
     }
 
@@ -162,11 +162,11 @@ public class UserInfoVO {
         this.email = email;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
