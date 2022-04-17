@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,10 @@ import java.io.InputStream;
 @CrossOrigin
 @Api(value = "用户相关业务的接口", tags = {"用户相关业务的controller"})
 public class UserController extends BasicController{
+
+    @Autowired
+    private UserService userService;
+
     @ApiOperation(value = "查询用户信息", notes = "查询用户信息的接口")
     @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
     @PostMapping(value = "/query")
@@ -40,8 +45,29 @@ public class UserController extends BasicController{
         return CropJSONResult.ok(userInfoVO);
     }
 
-    @Autowired
-    private UserService userService;
+
+
+    @ApiOperation(value = "完善个人信息 - id字段请忽略", notes = "完善个人信息的接口")
+    @ApiImplicitParam(name = "userInfo", value = "用户详情", required = true, dataType = "UserInfo", paramType = "data")
+    @PostMapping(value = "/completeUserInfo")
+    public CropJSONResult completeUserInfo(UserInfo userInfo) {
+
+        if (StringUtils.isBlank(userInfo.getUserId())) {
+            return CropJSONResult.errorMsg("用户id不能为空");
+        }
+
+        UserInfo userInfoByUserId = userService.queryUserInfo(userInfo.getUserId());
+        if (userInfoByUserId == null) {
+            return CropJSONResult.errorMsg("用户id不存在");
+        }
+
+        // id 是唯一标识符，不可更改
+        userInfo.setId(userInfoByUserId.getId());
+
+        userService.updateUserInfo(userInfo);
+
+        return CropJSONResult.ok();
+    }
 
     @ApiOperation(value = "用户上传头像", notes = "用户上传头像的接口")
     @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "form")

@@ -125,10 +125,10 @@ public class UserServiceImpl implements UserService {
         Example userInfoExample = new Example(UserInfo.class);
 
         Criteria criteria = userInfoExample.createCriteria();
+        criteria.andEqualTo("id", userInfo.getId());
         criteria.andEqualTo("userId", userInfo.getUserId());
-        System.out.println(userInfo);
-        userInfoMapper.updateByExampleSelective(userInfo, userInfoExample);
 
+        userInfoMapper.updateByExampleSelective(userInfo, userInfoExample);
     }
 
 
