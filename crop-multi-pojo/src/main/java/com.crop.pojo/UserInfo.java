@@ -41,7 +41,7 @@ public class UserInfo {
      * 电话
      */
     @ApiModelProperty(value = "电话号码")
-    private Integer tel;
+    private String tel;
 
     /**
      * 邮箱
@@ -53,7 +53,7 @@ public class UserInfo {
      * 个人描述
      */
     @ApiModelProperty(value = "个人描述")
-    private String desc;
+    private String description;
 
     public UserInfo() {
     }
@@ -151,7 +151,7 @@ public class UserInfo {
      *
      * @return tel - 电话
      */
-    public Integer getTel() {
+    public String getTel() {
         return tel;
     }
 
@@ -160,7 +160,7 @@ public class UserInfo {
      *
      * @param tel 电话
      */
-    public void setTel(Integer tel) {
+    public void setTel(String tel) {
         this.tel = tel;
     }
 
@@ -182,11 +182,11 @@ public class UserInfo {
         this.email = email;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
