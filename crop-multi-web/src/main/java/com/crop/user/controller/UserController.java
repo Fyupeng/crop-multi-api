@@ -48,9 +48,9 @@ public class UserController extends BasicController{
 
 
     @ApiOperation(value = "完善个人信息 - id字段请忽略", notes = "完善个人信息的接口")
-    @ApiImplicitParam(name = "userInfo", value = "用户详情", required = true, dataType = "UserInfo", paramType = "data")
+    @ApiImplicitParam(name = "userInfo", value = "用户详情", required = true, dataType = "UserInfo", paramType = "body")
     @PostMapping(value = "/completeUserInfo")
-    public CropJSONResult completeUserInfo(UserInfo userInfo) {
+    public CropJSONResult completeUserInfo(@RequestBody UserInfo userInfo) {
 
         if (StringUtils.isBlank(userInfo.getUserId())) {
             return CropJSONResult.errorMsg("用户id不能为空");

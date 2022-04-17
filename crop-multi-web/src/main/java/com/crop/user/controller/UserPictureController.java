@@ -67,7 +67,7 @@ public class UserPictureController extends BasicController {
     }
 
     @ApiOperation(value = "上传图片 - 图片id 请忽略", notes = "上传图片的接口")
-    @ApiImplicitParam(name = "picture", value = "图片信息", required = true, dataType = "Picture", paramType = "data")
+    @ApiImplicitParam(name = "picture", value = "图片信息", required = true, dataType = "Picture", paramType = "body")
     @PostMapping(value = "/upload", headers = "content-type=multipart/form-data")
     public CropJSONResult upload(@RequestBody Picture picture,
             /*@RequestParam(value = "file")  这两个注解不能搭配使用，会导致 文件上传按钮失效*/
