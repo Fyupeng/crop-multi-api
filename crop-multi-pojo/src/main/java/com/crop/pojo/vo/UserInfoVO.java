@@ -14,6 +14,8 @@ public class UserInfoVO {
      */
     private String userId;
 
+    private int sex;
+
     /**
      * 我的头像，如果没有就默认给一张
      */
@@ -33,6 +35,8 @@ public class UserInfoVO {
      * 邮箱
      */
     private String email;
+
+    private String desc;
 
     /**
      * 获取主键
@@ -78,14 +82,19 @@ public class UserInfoVO {
         this.userToken = userToken;
     }
 
+    public int getSex() {
+        return sex;
+    }
+
+    public void setSex(int sex) {
+        this.sex = sex;
+    }
+
     /**
      * 获取我的头像，如果没有就默认给一张
      *
      * @return avatar - 我的头像，如果没有就默认给一张
      */
-
-
-
     public String getAvatar() {
         return avatar;
     }
@@ -153,17 +162,11 @@ public class UserInfoVO {
         this.email = email;
     }
 
+    public String getDesc() {
+        return desc;
+    }
 
-    @Override
-    public String toString() {
-        return "UserInfoVO{" +
-                "id='" + id + '\'' +
-                ", userToken='" + userToken + '\'' +
-                ", userId='" + userId + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", nickname='" + nickname + '\'' +
-                ", tel=" + tel +
-                ", email='" + email + '\'' +
-                '}';
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 }

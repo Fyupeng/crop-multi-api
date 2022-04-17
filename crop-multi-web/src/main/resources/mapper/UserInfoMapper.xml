@@ -12,5 +12,6 @@
     <result column="nickname" property="nickname" jdbcType="VARCHAR" />
     <result column="tel" property="tel" jdbcType="INTEGER" />
     <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="desc" property="desc" jdbcType="VARCHAR" />
   </resultMap>
 </mapper>

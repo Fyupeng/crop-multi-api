@@ -49,6 +49,12 @@ public class UserInfo {
     @ApiModelProperty(value = "邮箱")
     private String email;
 
+    /**
+     * 个人描述
+     */
+    @ApiModelProperty(value = "个人描述")
+    private String desc;
+
     public UserInfo() {
     }
 
@@ -176,4 +182,11 @@ public class UserInfo {
         this.email = email;
     }
 
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
 }
