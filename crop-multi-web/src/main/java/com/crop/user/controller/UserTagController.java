@@ -169,7 +169,7 @@ public class UserTagController extends BasicController {
         }
 
         // 标记 Articles2Tags
-        boolean saveIsTrue = tagService.updateArticleTag(articles2tags);
+        boolean saveIsTrue = tagService.saveArticleTag(articles2tags);
 
         return saveIsTrue ? CropJSONResult.ok() : CropJSONResult.errorMsg("内部错误导致保存失败");
     }
@@ -204,7 +204,7 @@ public class UserTagController extends BasicController {
         }
 
         // 标记 Articles2Tags
-        boolean saveIsTrue = tagService.saveArticleTag(articles2tags);
+        boolean saveIsTrue = tagService.updateArticleTag(articles2tags);
 
         return saveIsTrue ? CropJSONResult.ok() : CropJSONResult.errorMsg("内部错误导致保存失败");
     }
