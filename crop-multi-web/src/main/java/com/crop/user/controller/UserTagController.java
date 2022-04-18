@@ -2,6 +2,7 @@ package com.crop.user.controller;
 
 import com.crop.pojo.Articles2tags;
 import com.crop.pojo.Tag;
+import com.crop.pojo.vo.ArticleVO;
 import com.crop.pojo.vo.Articles2tagsVO;
 import com.crop.pojo.vo.TagVO;
 import com.crop.service.*;
@@ -132,6 +133,25 @@ public class UserTagController extends BasicController {
         }
 
         return CropJSONResult.ok();
+    }
+
+    @PostMapping(value = "/getArticleWithNoneTag")
+    @ApiOperation(value = "获取无标签文章", notes = "获取无标签文章的接口")
+    @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
+    public CropJSONResult getArticleWithNoneTag(String userId) {
+
+        if (StringUtils.isBlank(userId)) {
+            return CropJSONResult.errorMsg("用户id不能为空");
+        }
+
+
+        if (!userService.queryUserIdIsExist(userId)) {
+            return CropJSONResult.errorMsg("用户id不存在");
+        }
+
+        List<ArticleVO> articleVOList = articleService.queryArticleWithNoneTagByUser(userId);
+
+        return CropJSONResult.ok(articleVOList);
     }
 
     @PostMapping(value = "/getArticleTag")
