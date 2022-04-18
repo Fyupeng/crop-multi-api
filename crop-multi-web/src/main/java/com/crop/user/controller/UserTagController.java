@@ -36,6 +36,9 @@ public class UserTagController extends BasicController {
     @Autowired
     private TagService tagService;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping(value = "/getTag")
     @ApiOperation(value = "获取标签", notes = "获取标签的接口")
     @ApiImplicitParam(name = "tagId", value = "标签id", required = true, dataType = "String", paramType = "query")
@@ -93,14 +96,19 @@ public class UserTagController extends BasicController {
             return CropJSONResult.errorMsg("标签id或标签名不能为空");
         }
 
-        Tag tagWithId = new Tag();
-        tagWithId.setId(tag.getId());
-
-        if (!tagService.queryTagIsExist(tagWithId)) {
-            return CropJSONResult.errorMsg("标签id不存在");
+        // 用來 防止 其他 用户 对非本地 标签的 更改
+        if (StringUtils.isBlank(tag.getUserId())) {
+            return CropJSONResult.errorMsg("用户id不能为空");
         }
 
-        tag.setUserId(null);
+        Tag tagWithIdAndUserId = new Tag();
+        tagWithIdAndUserId.setId(tag.getId());
+        tagWithIdAndUserId.setUserId(tag.getUserId());
+
+        if (!tagService.queryTagIsExist(tagWithIdAndUserId)) {
+            return CropJSONResult.errorMsg("该用户没有该标签");
+        }
+
         boolean updateIsTrue = tagService.updateTag(tag);
 
         return updateIsTrue ? CropJSONResult.ok() : CropJSONResult.errorMsg("内部错误");
