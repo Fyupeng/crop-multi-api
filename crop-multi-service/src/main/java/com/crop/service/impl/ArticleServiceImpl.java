@@ -1,13 +1,14 @@
 package com.crop.service.impl;
 
 import com.crop.mapper.ArticleRepository;
+import com.crop.mapper.Articles2tagsMapper;
 import com.crop.mapper.ClassficationMapper;
 import com.crop.mapper.UserInfoMapper;
-import com.crop.pojo.Article;
-import com.crop.pojo.Classfication;
-import com.crop.pojo.UserInfo;
+import com.crop.pojo.*;
 import com.crop.pojo.vo.ArticleVO;
+import com.crop.pojo.vo.Articles2tagsVO;
 import com.crop.service.ArticleService;
+import com.crop.service.TagService;
 import com.crop.utils.PagedResult;
 import com.crop.utils.TimeAgoUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.SimpleFormatter;
 
 /**
  * @Auther: fyp
@@ -48,6 +48,12 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private ClassficationMapper classficationMapper;
+
+    @Autowired
+    private TagService tagService;
+
+    @Autowired
+    private Articles2tagsMapper articles2tagsMapper;
 
     @Autowired
     private Sid sid;
@@ -197,6 +203,17 @@ public class ArticleServiceImpl implements ArticleService {
             articleVO.setNickName(userInfo.getNickname());
             articleVO.setClassficationName(classfication.getName());
 
+            // 标签
+            String aid = result.getId();
+            Articles2tags articles2tags = new Articles2tags();
+            articles2tags.setArticleId(aid);
+            List<Articles2tagsVO> select = tagService.queryArticleTag(articles2tags);
+            if (select.size() != 0) {
+                Tag tag = tagService.queryTag(select.get(0).getTagId());
+                articleVO.setTagId(tag.getId());
+                articleVO.setTagName(tag.getName());
+            }
+
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
             String normalCreateTime = sdf.format(result.getCreateTime());
             String normalUpdateTime = sdf.format(result.getUpdateTime());
@@ -233,6 +250,7 @@ public class ArticleServiceImpl implements ArticleService {
 
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
     public PagedResult queryArticleByTime(Long timeDifference, Integer page, Integer pageSize) {
 
         //分页查询对象
@@ -312,6 +330,55 @@ public class ArticleServiceImpl implements ArticleService {
 
 
         return pagedResult;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public List<ArticleVO> queryArticleWithNoneTagByUser(String userId) {
+
+        ExampleMatcher matching = ExampleMatcher.matching();
+        ExampleMatcher articleExampleMatcher = matching.withMatcher("userId", ExampleMatcher.GenericPropertyMatchers.exact());
+
+        Article article = new Article();
+        article.setUserId(userId);
+
+        Example<Article> articleExample = Example.of(article, articleExampleMatcher);
+
+        List<Article> all = articleRepository.findAll(articleExample);
+
+        List<ArticleVO> artileVOList = new ArrayList<>();
+        for (Article ac : all) {
+
+            String articleId = ac.getId();
+            Articles2tags articles2tags = new Articles2tags();
+            articles2tags.setArticleId(articleId);
+            // 过滤掉 有标签 标记的 用户文章
+            boolean articleTagIsExist = tagService.queryArticleTagIsExist(articles2tags);
+            if (articleTagIsExist) {
+                continue;
+            }
+
+            System.out.println(1);
+
+            String createTimeAgo = TimeAgoUtils.format(ac.getCreateTime());
+            String updateTimeAgo = TimeAgoUtils.format(ac.getUpdateTime());
+            ArticleVO articleVO = new ArticleVO();
+            BeanUtils.copyProperties(ac, articleVO);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            String normalCreateTime = sdf.format(ac.getCreateTime());
+            String normalUpdateTime = sdf.format(ac.getUpdateTime());
+            articleVO.setNormalCreateTime(normalCreateTime);
+            articleVO.setNormalUpdateTime(normalUpdateTime);
+            articleVO.setCreateTimeAgoStr(createTimeAgo);
+            articleVO.setUpdateTimeAgoStr(updateTimeAgo);
+            /**
+             * 查询量 太大，流量大，而且 用户 只是在 查询而已，不需要评论 和 内容
+             */
+            articleVO.setContent(null);
+            artileVOList.add(articleVO);
+        }
+
+        return artileVOList;
     }
 
 

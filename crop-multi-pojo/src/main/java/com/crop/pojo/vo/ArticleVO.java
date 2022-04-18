@@ -74,6 +74,10 @@ public class ArticleVO implements Comparable {
     private String nickName;
     private String avatar;
 
+    // 目前只做 一篇 文章 对于 一个 标签
+    private String tagId;
+    private String tagName;
+
     public String getId() {
         return id;
     }
@@ -216,6 +220,22 @@ public class ArticleVO implements Comparable {
 
     public void setNormalUpdateTime(String normalUpdateTime) {
         this.normalUpdateTime = normalUpdateTime;
+    }
+
+    public String getTagName() {
+        return tagName;
+    }
+
+    public String getTagId() {
+        return tagId;
+    }
+
+    public void setTagId(String tagId) {
+        this.tagId = tagId;
+    }
+
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
     }
 
     @Override
