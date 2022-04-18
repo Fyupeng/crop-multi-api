@@ -35,4 +35,6 @@ public interface ArticleService {
     void removeArticle(String articleId);
 
     PagedResult queryArticleByTime(Long timeDifference, Integer page, Integer pageSize);
+
+    List<ArticleVO> queryArticleWithNoneTagByUser(String userId);
 }
