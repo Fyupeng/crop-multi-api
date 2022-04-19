@@ -20,7 +20,6 @@ import java.io.InputStream;
 
 @RestController
 @RequestMapping(value = "/user")
-@CrossOrigin
 @Api(value = "用户相关业务的接口", tags = {"用户相关业务的controller"})
 public class UserController extends BasicController{
 
@@ -89,6 +88,7 @@ public class UserController extends BasicController{
         try {
             if(file != null){
                 String fileName = file.getOriginalFilename();
+                System.out.println("fileName" + fileName);
                 if (StringUtils.isNotBlank(fileName)) {
                     //文件上传的最终保存路径
                     String finalFacePath = FILE_SPACE + uploadPathDB + "/" + fileName;
@@ -107,11 +107,11 @@ public class UserController extends BasicController{
                     IOUtils.copy(inputStream, fileOutputStream);//把输入流赋值给输出流，就是把图片复制到输出流对应的路径下
                 }
             }else {
-                return CropJSONResult.errorMsg("上传出错....");
+                return CropJSONResult.errorMsg("上传出错1....");
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return CropJSONResult.errorMsg("上传出错....");
+            return CropJSONResult.errorMsg("上传出错2....");
         }finally {
             if(fileOutputStream != null){
                 fileOutputStream.flush();

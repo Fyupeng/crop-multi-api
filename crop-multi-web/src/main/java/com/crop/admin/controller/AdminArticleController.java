@@ -42,7 +42,6 @@ import static com.crop.utils.RedisUtils.VIEW_COUNT;
  */
 @Slf4j
 @RestController
-@CrossOrigin
 @RequestMapping(value = "/admin/article")
 @Api(value = "文章相关业务的接口", tags = {"文章相关业务的controller"})
 public class AdminArticleController extends BasicController {

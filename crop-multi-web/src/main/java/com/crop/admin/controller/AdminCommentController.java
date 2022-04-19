@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-@CrossOrigin
 @RequestMapping(value = "/admin/comment")
 @Api(value = "评论相关业务的接口", tags = {"评论相关业务的controller"})
 public class AdminCommentController extends BasicController {

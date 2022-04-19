@@ -16,7 +16,6 @@ import java.util.UUID;
 
 @SuppressWarnings("all")
 @RestController
-@CrossOrigin
 @RequestMapping(value = "/user")
 @Api(value = "用户注册登录的接口", tags = {"注册和登录的controller"})
 public class UserRegistLoginController extends BasicController{

@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@CrossOrigin
 @Api(value = "评论相关业务的接口", tags = {"评论相关业务的controller"})
 @RequestMapping(value = "/user/comment")
 public class UserCommentController extends BasicController {

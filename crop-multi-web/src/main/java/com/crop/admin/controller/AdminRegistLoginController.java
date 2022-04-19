@@ -20,7 +20,6 @@ import java.util.UUID;
 @SuppressWarnings("all")
 @RestController
 @RequestMapping(value = "/admin")
-@CrossOrigin
 @Api(value = "管理员注册登录的接口", tags = {"管理员注册和登录的controller"})
 public class AdminRegistLoginController extends BasicController {
     @Autowired

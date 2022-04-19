@@ -26,7 +26,6 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@CrossOrigin
 @Api(value = "标签相关业务的接口", tags = {"标签相关业务的controller"})
 @RequestMapping(value = "/user/tag")
 public class UserTagController extends BasicController {

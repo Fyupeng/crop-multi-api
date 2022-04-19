@@ -28,7 +28,6 @@ import java.io.InputStream;
  */
 
 @RestController
-@CrossOrigin
 @RequestMapping(value = "/user/picture")
 @Api(value = "图片上传识别相关业务的接口", tags = {"图片上传识别相关业务的controller"})
 public class UserPictureController extends BasicController {

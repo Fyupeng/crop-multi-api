@@ -27,7 +27,6 @@ import java.util.*;
  */
 @Slf4j
 @RestController
-@CrossOrigin
 @Api(value = "文章相关业务的接口", tags = {"文章相关业务的controller"})
 @RequestMapping(value = "/user/article")
 public class UserArticleController extends BasicController {
@@ -69,9 +68,9 @@ public class UserArticleController extends BasicController {
         }
         int n = filter.CheckSensitiveWord(searchKey,0,1);
         if(n > 0){ //存在非法字符
-            log.info("用户{}使用非法字符[{}]进行检索--",searchKey,userId);
+            log.info("用户[{}]使用非法字符[{}]进行检索--",userId, searchKey);
             Set<String> sensitiveWord = filter.getSensitiveWord(searchKey, 1);
-            return CropJSONResult.ok(sensitiveWord);
+            return CropJSONResult.errorMsg("捕捉敏感关键字: " + sensitiveWord);
         }
 
         // 进行 热度 维护
