@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 
-@CrossOrigin
+@CrossOrigin(origins = "*", allowCredentials = "true")
 @RestController
 public class BasicController {
 
