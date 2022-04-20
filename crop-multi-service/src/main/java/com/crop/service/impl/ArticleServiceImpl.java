@@ -358,8 +358,6 @@ public class ArticleServiceImpl implements ArticleService {
                 continue;
             }
 
-            System.out.println(1);
-
             String createTimeAgo = TimeAgoUtils.format(ac.getCreateTime());
             String updateTimeAgo = TimeAgoUtils.format(ac.getUpdateTime());
             ArticleVO articleVO = new ArticleVO();
