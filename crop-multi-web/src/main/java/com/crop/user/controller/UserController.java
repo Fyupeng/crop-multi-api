@@ -1,6 +1,8 @@
 package com.crop.user.controller;
 
+import com.crop.pojo.User;
 import com.crop.pojo.UserInfo;
+import com.crop.pojo.vo.UserForUpdateVO;
 import com.crop.pojo.vo.UserInfoVO;
 import com.crop.service.UserService;
 import com.crop.utils.CropJSONResult;
@@ -9,7 +11,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -88,7 +89,6 @@ public class UserController extends BasicController{
         try {
             if(file != null){
                 String fileName = file.getOriginalFilename();
-                System.out.println("fileName" + fileName);
                 if (StringUtils.isNotBlank(fileName)) {
                     //文件上传的最终保存路径
                     String finalFacePath = FILE_SPACE + uploadPathDB + "/" + fileName;
@@ -128,6 +128,35 @@ public class UserController extends BasicController{
         userService.updateUserInfo(userInfo);
 
         return CropJSONResult.ok(uploadPathDB);
+    }
+
+    @ApiOperation(value = "用户修改密码", notes = "用户修改密码的接口")
+    @ApiImplicitParam(name = "userVO", value = "用户id", required = true, dataType = "UserForUpdateVO", paramType = "body")
+    @PostMapping(value = "/updatePassword")
+    public CropJSONResult updatePassword(@RequestBody UserForUpdateVO user) {
+
+        if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getOldPassword())) {
+            return CropJSONResult.errorMsg("用户名和原密码不能为空");
+        }
+
+        if (StringUtils.isBlank(user.getNewPassword())) {
+            return CropJSONResult.errorMsg("新密码不能为空");
+        }
+
+        User userResult = userService.queryUserForLogin(user.getUsername(), user.getOldPassword());
+
+        if (userResult == null) {
+            CropJSONResult.errorMsg("用户名或原密码不正确");
+        }
+
+        User userForUpdate = new User();
+        userForUpdate.setId(userResult.getId());
+        userForUpdate.setUsername(user.getUsername());
+        userForUpdate.setPassword(user.getNewPassword());
+
+        boolean updateTrue = userService.updateUser(userForUpdate);
+
+        return updateTrue ? CropJSONResult.ok() : CropJSONResult.errorMsg("修改失败");
     }
 
 

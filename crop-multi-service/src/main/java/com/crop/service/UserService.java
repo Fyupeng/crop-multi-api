@@ -47,7 +47,7 @@ public interface UserService {
      * @Description: 用户修改信息
      * @param user
      */
-    public void updateUser(User user);
+    public boolean updateUser(User user);
 
     /**
      * @Description: 用户修改详细信息

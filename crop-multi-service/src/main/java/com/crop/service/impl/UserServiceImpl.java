@@ -68,7 +68,6 @@ public class UserServiceImpl implements UserService {
         Example userInfoExample = new Example(UserInfo.class);
 
         Criteria criteria = userInfoExample.createCriteria();
-        System.out.println(userId);
         criteria.andEqualTo("userId", userId);
         UserInfo userInfo = userInfoMapper.selectOneByExample(userInfoExample);
         return userInfo;
@@ -108,13 +107,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void updateUser(User user){
+    public boolean updateUser(User user){
+
+        int i = userMapper.updateByPrimaryKey(user);
+
+        return i > 0 ? true : false;
+
+        /**
+         * 防止 在 controller 忘记 传进 id 值，将会导致 所有用户 被更改
+         *  fix : 弃用
+        if (StringUtils.isBlank(user.getId())) {
+            return;
+        }
 
         Example userExample = new Example(User.class);
 
+        // id 值为空时， 会 匹配所有用户，危险 !!!
         Criteria criteria = userExample.createCriteria();
         criteria.andEqualTo("id", user.getId());
         userMapper.updateByExampleSelective(user, userExample);
+         */
 
     }
 
