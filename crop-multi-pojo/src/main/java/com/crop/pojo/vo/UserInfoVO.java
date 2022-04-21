@@ -38,6 +38,8 @@ public class UserInfoVO {
 
     private String description;
 
+    private Integer permission;
+
     /**
      * 获取主键
      *
@@ -168,5 +170,13 @@ public class UserInfoVO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getPermission() {
+        return permission;
+    }
+
+    public void setPermission(Integer permission) {
+        this.permission = permission;
     }
 }

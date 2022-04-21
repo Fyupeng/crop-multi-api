@@ -6,6 +6,7 @@ import com.crop.pojo.vo.UserForUpdateVO;
 import com.crop.pojo.vo.UserInfoVO;
 import com.crop.service.UserService;
 import com.crop.utils.CropJSONResult;
+import com.crop.utils.MD5Utils;
 import io.swagger.annotations.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,8 +40,12 @@ public class UserController extends BasicController{
         UserInfo userInfo = userService.queryUserInfo(userId);
         UserInfoVO userInfoVO = new UserInfoVO();
 
-        if (userInfo != null)
+        if (userInfo != null) {
             BeanUtils.copyProperties(userInfo,userInfoVO);
+            User user = userService.queryUser(userId);
+            userInfoVO.setPermission(user.getPermission());
+        }
+
 
         return CropJSONResult.ok(userInfoVO);
     }
@@ -69,12 +74,18 @@ public class UserController extends BasicController{
         return CropJSONResult.ok();
     }
 
+
     @ApiOperation(value = "用户上传头像", notes = "用户上传头像的接口")
     @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "form")
     @PostMapping(value = "/uploadFace", headers = "content-type=multipart/form-data")
-    public CropJSONResult uploadFace(String userId,
-                                     /*@RequestParam(value = "file")  这两个注解不能搭配使用，会导致 文件上传按钮失效*/
-                                     @ApiParam(value = "头像") MultipartFile file) throws Exception{
+    public CropJSONResult uploadFace(@RequestParam(value = "userId") String userId,
+                                     @RequestParam(value = "file") /* 这两个注解不能搭配使用，会导致 文件上传按钮失效*/
+                                     /*@ApiParam(value = "头像")*/ MultipartFile file) throws Exception{
+
+        System.out.println(userId);
+        System.out.println(file.getOriginalFilename());
+
+
         if(StringUtils.isBlank(userId)){
             return CropJSONResult.errorMsg("用户id不能为空");
         }
@@ -118,9 +129,12 @@ public class UserController extends BasicController{
                 fileOutputStream.close();
             }
         }
+
+
         /**
          * User 与 UserInfo 是 一一对应的关系，UserInfo 有两个候选键 id 和 userId
          */
+
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(userId);
         userInfo.setAvatar(uploadPathDB);
@@ -133,7 +147,7 @@ public class UserController extends BasicController{
     @ApiOperation(value = "用户修改密码", notes = "用户修改密码的接口")
     @ApiImplicitParam(name = "userVO", value = "用户id", required = true, dataType = "UserForUpdateVO", paramType = "body")
     @PostMapping(value = "/updatePassword")
-    public CropJSONResult updatePassword(@RequestBody UserForUpdateVO user) {
+    public CropJSONResult updatePassword(@RequestBody UserForUpdateVO user) throws Exception {
 
         if (StringUtils.isBlank(user.getUsername()) || StringUtils.isBlank(user.getOldPassword())) {
             return CropJSONResult.errorMsg("用户名和原密码不能为空");
@@ -143,7 +157,7 @@ public class UserController extends BasicController{
             return CropJSONResult.errorMsg("新密码不能为空");
         }
 
-        User userResult = userService.queryUserForLogin(user.getUsername(), user.getOldPassword());
+        User userResult = userService.queryUserForLogin(user.getUsername(), MD5Utils.getMD5Str(user.getOldPassword()));
 
         if (userResult == null) {
             CropJSONResult.errorMsg("用户名或原密码不正确");
@@ -152,11 +166,14 @@ public class UserController extends BasicController{
         User userForUpdate = new User();
         userForUpdate.setId(userResult.getId());
         userForUpdate.setUsername(user.getUsername());
-        userForUpdate.setPassword(user.getNewPassword());
+        userForUpdate.setPassword(MD5Utils.getMD5Str(user.getNewPassword()));
+        userForUpdate.setPermission(userResult.getPermission());
 
         boolean updateTrue = userService.updateUser(userForUpdate);
 
-        return updateTrue ? CropJSONResult.ok() : CropJSONResult.errorMsg("修改失败");
+        userForUpdate.setPassword("");
+
+        return updateTrue ? CropJSONResult.ok(userForUpdate) : CropJSONResult.errorMsg("修改失败");
     }
 
 
