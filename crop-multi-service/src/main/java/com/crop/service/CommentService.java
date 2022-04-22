@@ -1,7 +1,11 @@
 package com.crop.service;
 
 import com.crop.pojo.Comment;
+import com.crop.pojo.vo.CommentVO;
 import com.crop.utils.PagedResult;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @Auther: fyp
@@ -28,4 +32,6 @@ public interface CommentService {
     boolean queryCommentWithFatherCommentIsExist(String commentId);
 
     void removeCommentWithFatherCommentId(String fatherCommentId);
+
+    List<CommentVO> queryAllComments(String aPattern, String cPattern, String userId, Date startTime, Date endTime);
 }

@@ -10,10 +10,14 @@ import com.crop.service.CommentService;
 import com.crop.utils.PagedResult;
 import com.crop.utils.TimeAgoUtils;
 import io.swagger.annotations.ApiImplicitParam;
+import org.apache.commons.lang3.StringUtils;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +43,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private UserInfoMapper userInfoMapper;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Autowired
     private Sid sid;
@@ -96,43 +103,8 @@ public class CommentServiceImpl implements CommentService {
 
         List<CommentVO> commentVOList = new ArrayList<>();
         // po -> vo 永久层对象 - 视图层对象
-        for (Comment ct : content) {
-            CommentVO commentVO = new CommentVO();
-            BeanUtils.copyProperties(ct, commentVO);
+        forCopyComment(content, commentVOList);
 
-            // fromUser
-            String fromUserId = ct.getFromUserId();
-            UserInfo userInfoWithFromUserId = new UserInfo();
-            userInfoWithFromUserId.setUserId(fromUserId);
-            UserInfo fromUserInfo = userInfoMapper.selectOne(userInfoWithFromUserId);
-            commentVO.setFromUserNickName(fromUserInfo.getNickname());
-            commentVO.setFromUserAvatar(fromUserInfo.getAvatar());
-            // fatherCommentContent
-            String fatherCommentId = ct.getFatherCommentId();
-            if (fatherCommentId != null) {
-                Comment fatherComment = commentRepository.findOne(fatherCommentId);
-                commentVO.setFatherCommentContent(fatherComment.getComment());
-            }
-            // toUser
-            String toUserId = ct.getToUserId();
-            if (toUserId != null) {
-                UserInfo userInfoWithToUserId = new UserInfo();
-                userInfoWithToUserId.setUserId(toUserId);
-                UserInfo toUserInfo = userInfoMapper.selectOne(userInfoWithToUserId);
-                commentVO.setToUserNickName(toUserInfo == null ? null : toUserInfo.getNickname());
-            }
-
-            //time
-            String createTimeAgo = TimeAgoUtils.format(ct.getCreateTime());
-            commentVO.setCreateTimeAgo(createTimeAgo);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
-            String normalCreateTime = sdf.format(ct.getCreateTime());
-            commentVO.setNormalCreateTime(normalCreateTime);
-
-            // 防止 被恶意使用
-            commentVO.setToUserId(null);
-            commentVOList.add(commentVO);
-        }
 
         PagedResult pagedResult = new PagedResult();
         // 页数
@@ -201,6 +173,140 @@ public class CommentServiceImpl implements CommentService {
         comment.setFatherCommentId(fatherCommentId);
 
         commentRepository.delete(comment);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public List<CommentVO> queryAllComments(String aPattern, String cPattern, String userId, Date startDate, Date endDate) {
+
+        if (StringUtils.isBlank(aPattern)) {
+            aPattern = "";
+        }
+        Article article = new Article();
+        article.setTitle(aPattern);
+        article.setSummary(aPattern);
+
+        ExampleMatcher articleMatcher = ExampleMatcher.matching()
+                .withMatcher("title", ExampleMatcher.GenericPropertyMatchers.contains())
+                .withMatcher("summary", ExampleMatcher.GenericPropertyMatchers.contains());
+
+        Example<Article> articleExample = Example.of(article, articleMatcher);
+
+        if (StringUtils.isBlank(cPattern)) {
+            cPattern = "";
+        }
+        Comment comment = new Comment();
+        comment.setComment(cPattern);
+
+        ExampleMatcher commentMatcher = ExampleMatcher.matching()
+                .withMatcher("comment", ExampleMatcher.GenericPropertyMatchers.contains());
+
+        Example<Comment> commentExample = Example.of(comment, commentMatcher);
+
+        // 不去匹配cPattern, 做时间 跨度 过滤
+        Query queryAllArticle = new Query();
+        // 不去 查询文章 时间
+        //queryAllArticle.addCriteria(Criteria.where("createTime").gt(startDate).lt(endDate));
+
+        List<Comment> resultCommentList = new ArrayList<>();
+
+        if (StringUtils.isNotBlank(aPattern) && StringUtils.isNotBlank(cPattern)) {
+            queryAllArticle.addCriteria(new Criteria().alike(articleExample));
+
+            List<Article> articleAllList = mongoTemplate.find(queryAllArticle, Article.class);
+            for (Article ac : articleAllList) {
+                Query queryAllComment = new Query();
+                prepareQuery(queryAllComment, startDate, endDate);
+                queryAllComment.addCriteria(Criteria.where("articleId").is(ac.getId()));
+                if (userId != null)
+                    queryAllComment.addCriteria(Criteria.where("fromUserId").is(userId));
+                queryAllComment.addCriteria(new Criteria().alike(commentExample));
+
+                List<Comment> comments = mongoTemplate.find(queryAllComment, Comment.class);
+
+                resultCommentList.addAll(comments);
+            }
+        } else {
+            if (StringUtils.isBlank(cPattern)) {
+                queryAllArticle.addCriteria(new Criteria().alike(articleExample));
+
+                List<Article> articleAllList = mongoTemplate.find(queryAllArticle, Article.class);
+                for (Article ac : articleAllList) {
+                    Query queryAllComment = new Query();
+                    prepareQuery(queryAllComment, startDate, endDate);
+                    queryAllComment.addCriteria(Criteria.where("articleId").is(ac.getId()));
+                    if (userId != null)
+                        queryAllComment.addCriteria(Criteria.where("fromUserId").is(userId));
+
+                    List<Comment> comments = mongoTemplate.find(queryAllComment, Comment.class);
+
+                    resultCommentList.addAll(comments);
+                }
+            }
+            if (StringUtils.isBlank(aPattern)) {
+                Query queryAllComment = new Query();
+                prepareQuery(queryAllComment, startDate, endDate);
+                queryAllComment.addCriteria(new Criteria().alike(commentExample));
+                if (userId != null)
+                    queryAllComment.addCriteria(Criteria.where("fromUserId").is(userId));
+
+                List<Comment> comments = mongoTemplate.find(queryAllComment, Comment.class);
+
+                resultCommentList.addAll(comments);
+            }
+        }
+
+        List<CommentVO> commentVOList = new ArrayList<>();
+        forCopyComment(resultCommentList, commentVOList);
+
+        return commentVOList;
+    }
+
+
+    private void forCopyComment(List<Comment> commentList, List<CommentVO> commentVOList) {
+        for (Comment ct : commentList) {
+            CommentVO commentVO = new CommentVO();
+            BeanUtils.copyProperties(ct, commentVO);
+
+            // fromUser
+            String fromUserId = ct.getFromUserId();
+            UserInfo userInfoWithFromUserId = new UserInfo();
+            userInfoWithFromUserId.setUserId(fromUserId);
+            UserInfo fromUserInfo = userInfoMapper.selectOne(userInfoWithFromUserId);
+            commentVO.setFromUserNickName(fromUserInfo.getNickname());
+            commentVO.setFromUserAvatar(fromUserInfo.getAvatar());
+            // fatherCommentContent
+            String fatherCommentId = ct.getFatherCommentId();
+            if (fatherCommentId != null) {
+                Comment fatherComment = commentRepository.findOne(fatherCommentId);
+                commentVO.setFatherCommentContent(fatherComment.getComment());
+            }
+            // toUser
+            String toUserId = ct.getToUserId();
+            if (toUserId != null) {
+                UserInfo userInfoWithToUserId = new UserInfo();
+                userInfoWithToUserId.setUserId(toUserId);
+                UserInfo toUserInfo = userInfoMapper.selectOne(userInfoWithToUserId);
+                commentVO.setToUserNickName(toUserInfo == null ? null : toUserInfo.getNickname());
+            }
+
+            //time
+            String createTimeAgo = TimeAgoUtils.format(ct.getCreateTime());
+            commentVO.setCreateTimeAgo(createTimeAgo);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            String normalCreateTime = sdf.format(ct.getCreateTime());
+            commentVO.setNormalCreateTime(normalCreateTime);
+
+            // 防止 被恶意使用
+            commentVO.setToUserId(null);
+            commentVOList.add(commentVO);
+        }
+    }
+
+    private void prepareQuery(Query query, Date startDate, Date endDate) {
+        query.addCriteria(Criteria.where("createTime").gt(startDate).lt(endDate));
+        Sort sort = new Sort(Sort.Direction.DESC, "createTime");
+        query.with(sort);
     }
 
 
