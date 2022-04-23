@@ -59,6 +59,15 @@ public class Comment implements Serializable {
     @ApiModelProperty(value = "评论内容", required = true)
     private String comment;
 
+    /**
+     * 评论状态
+     *  0 - 正常状态
+     *  1 - 屏蔽
+     */
+    @ApiModelProperty(value = "状态")
+    private Integer status;
+
+
     public Comment() {
     }
 
@@ -186,5 +195,13 @@ public class Comment implements Serializable {
      */
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

@@ -1,5 +1,6 @@
 package com.crop.service;
 
+import com.crop.enums.CommentStatus;
 import com.crop.pojo.Comment;
 import com.crop.pojo.vo.CommentVO;
 import com.crop.utils.PagedResult;
@@ -34,4 +35,6 @@ public interface CommentService {
     void removeCommentWithFatherCommentId(String fatherCommentId);
 
     List<CommentVO> queryAllComments(String aPattern, String cPattern, String userId, Date startTime, Date endTime);
+
+    void setCommentStatusWithFatherId(Comment comment, CommentStatus commentStatus);
 }

@@ -1,5 +1,6 @@
 package com.crop.service.impl;
 
+import com.crop.enums.CommentStatus;
 import com.crop.mapper.CommentRepository;
 import com.crop.mapper.UserInfoMapper;
 import com.crop.pojo.Article;
@@ -79,10 +80,13 @@ public class CommentServiceImpl implements CommentService {
 
         ExampleMatcher matching = ExampleMatcher.matching();
 
-        ExampleMatcher articleExampleMatcher = matching.withMatcher("articleId", ExampleMatcher.GenericPropertyMatchers.exact());
+        ExampleMatcher articleExampleMatcher = matching
+                .withMatcher("articleId", ExampleMatcher.GenericPropertyMatchers.exact())
+                .withMatcher("status", ExampleMatcher.GenericPropertyMatchers.exact());
 
         Comment comment = new Comment();
         comment.setArticleId(articleId);
+        comment.setStatus(CommentStatus.NORMAL.getStatus());
 
         Example<Comment> articleExample = Example.of(comment, articleExampleMatcher);
 
@@ -124,7 +128,9 @@ public class CommentServiceImpl implements CommentService {
     public boolean queryCommentWithFatherCommentIsExist(String commentId) {
 
         ExampleMatcher matching = ExampleMatcher.matching();
-        ExampleMatcher exampleMatcher = matching.withMatcher("fatherCommentId", ExampleMatcher.GenericPropertyMatchers.exact());
+        ExampleMatcher exampleMatcher = matching
+                .withMatcher("fatherCommentId", ExampleMatcher.GenericPropertyMatchers.exact());
+
 
         Comment comment = new Comment();
         comment.setFatherCommentId(commentId);
@@ -143,6 +149,7 @@ public class CommentServiceImpl implements CommentService {
         String commentId = sid.nextShort();
         comment.setId(commentId);
         comment.setCreateTime(new Date());
+        comment.setStatus(CommentStatus.NORMAL.getStatus());
         Comment result = commentRepository.save(comment);
 
         return result == null ? false : true;
@@ -152,6 +159,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateComment(Comment comment) {
 
+        comment.setStatus(CommentStatus.NORMAL.getStatus());
         Comment result = commentRepository.save(comment);
 
         return result == null ? false : true;
@@ -220,6 +228,7 @@ public class CommentServiceImpl implements CommentService {
                 queryAllComment.addCriteria(Criteria.where("articleId").is(ac.getId()));
                 if (userId != null)
                     queryAllComment.addCriteria(Criteria.where("fromUserId").is(userId));
+
                 queryAllComment.addCriteria(new Criteria().alike(commentExample));
 
                 List<Comment> comments = mongoTemplate.find(queryAllComment, Comment.class);
@@ -260,6 +269,30 @@ public class CommentServiceImpl implements CommentService {
         forCopyComment(resultCommentList, commentVOList);
 
         return commentVOList;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void setCommentStatusWithFatherId(Comment comment, CommentStatus commentStatus) {
+        // 本评论
+        comment.setStatus(commentStatus.getStatus());
+        commentRepository.save(comment);
+
+        String fatherCommentId = comment.getId();
+        Comment childComment = new Comment();
+        childComment.setFatherCommentId(fatherCommentId);
+
+        ExampleMatcher commentMatcher = ExampleMatcher.matching();
+        ExampleMatcher commentExampleMatcher = commentMatcher.withMatcher("fatherCommentId", ExampleMatcher.GenericPropertyMatchers.exact());
+
+        Example<Comment> commentExample = Example.of(childComment, commentExampleMatcher);
+
+        // 子评论
+        List<Comment> childCommentList = commentRepository.findAll(commentExample);
+        for (Comment ct : childCommentList) {
+            ct.setStatus(commentStatus.getStatus());
+            commentRepository.save(ct);
+        }
     }
 
 
@@ -305,6 +338,7 @@ public class CommentServiceImpl implements CommentService {
 
     private void prepareQuery(Query query, Date startDate, Date endDate) {
         query.addCriteria(Criteria.where("createTime").gt(startDate).lt(endDate));
+        query.addCriteria(Criteria.where("status").is(CommentStatus.NORMAL.getStatus()));
         Sort sort = new Sort(Sort.Direction.DESC, "createTime");
         query.with(sort);
     }
