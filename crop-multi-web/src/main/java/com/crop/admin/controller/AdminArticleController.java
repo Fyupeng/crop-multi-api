@@ -204,10 +204,10 @@ public class AdminArticleController extends BasicController {
 
     }
 
-    @PostMapping(value = "/stopTimeTast")
+    @PostMapping(value = "/stopTimeTask")
     @ApiOperation(value = "关闭任务", notes = "关闭任务的接口")
     @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
-    public CropJSONResult stopTimeTast(String userId) {
+    public CropJSONResult stopTimeTask(String userId) {
 
         if (StringUtils.isBlank(userId)) {
             return CropJSONResult.errorMsg("用户Id不能为空");

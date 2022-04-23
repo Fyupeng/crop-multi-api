@@ -338,7 +338,10 @@ public class CommentServiceImpl implements CommentService {
 
     private void prepareQuery(Query query, Date startDate, Date endDate) {
         query.addCriteria(Criteria.where("createTime").gt(startDate).lt(endDate));
-        query.addCriteria(Criteria.where("status").is(CommentStatus.NORMAL.getStatus()));
+        /**
+         * 管理员应该 获取所有状态的 评论
+         */
+        //query.addCriteria(Criteria.where("status").is(CommentStatus.NORMAL.getStatus()));
         Sort sort = new Sort(Sort.Direction.DESC, "createTime");
         query.with(sort);
     }
