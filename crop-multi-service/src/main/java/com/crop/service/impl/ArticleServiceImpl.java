@@ -141,7 +141,7 @@ public class ArticleServiceImpl implements ArticleService {
             String updateTimeAgo = TimeAgoUtils.format(ac.getUpdateTime());
             ArticleVO articleVO = new ArticleVO();
             BeanUtils.copyProperties(ac, articleVO);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String normalCreateTime = sdf.format(ac.getCreateTime());
             String normalUpdateTime = sdf.format(ac.getUpdateTime());
             articleVO.setNormalCreateTime(normalCreateTime);
@@ -214,7 +214,7 @@ public class ArticleServiceImpl implements ArticleService {
                 articleVO.setTagName(tag.getName());
             }
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String normalCreateTime = sdf.format(result.getCreateTime());
             String normalUpdateTime = sdf.format(result.getUpdateTime());
             articleVO.setNormalCreateTime(normalCreateTime);
@@ -362,7 +362,7 @@ public class ArticleServiceImpl implements ArticleService {
             String updateTimeAgo = TimeAgoUtils.format(ac.getUpdateTime());
             ArticleVO articleVO = new ArticleVO();
             BeanUtils.copyProperties(ac, articleVO);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String normalCreateTime = sdf.format(ac.getCreateTime());
             String normalUpdateTime = sdf.format(ac.getUpdateTime());
             articleVO.setNormalCreateTime(normalCreateTime);
