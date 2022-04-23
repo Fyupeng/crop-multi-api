@@ -1,6 +1,8 @@
 package com.crop.user.controller;
 
+import com.crop.enums.CommentStatus;
 import com.crop.pojo.Comment;
+import com.crop.pojo.User;
 import com.crop.service.*;
 import com.crop.utils.CropJSONResult;
 import com.crop.utils.PagedResult;
@@ -11,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -159,8 +162,15 @@ public class UserCommentController extends BasicController {
         return commentIsUpdate ? CropJSONResult.ok() : CropJSONResult.errorMsg("内部错误导致更新失败");
     }
 
+    /**
+     * 该方法 已被 弃用 建议使用 public com.crop.utils.CropJsonResult rollbackMyComment(String commentId, String userId)
+     * @param commentId
+     * @param userId
+     * @return
+     */
+    @Deprecated
     @PostMapping(value = "/removeMyComment")
-    @ApiOperation(value = "撤回评论", notes = "撤回评论的接口")
+    @ApiOperation(value = "删除评论 - 已废弃", notes = "删除评论的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "commentId", value = "评论id", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
@@ -187,6 +197,42 @@ public class UserCommentController extends BasicController {
         commentService.removeCommentById(commentId);
 
         return CropJSONResult.ok();
+    }
+
+    @PostMapping(value = "/removeMyComment")
+    @ApiOperation(value = "撤回评论", notes = "撤回评论的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "commentId", value = "评论id", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
+    })
+    public CropJSONResult rollbackMyComment(String commentId, String userId) {
+
+        if (StringUtils.isBlank(commentId)) {
+            return CropJSONResult.errorMsg("评论id不能为空");
+        }
+
+        if (StringUtils.isBlank(userId)) {
+            return CropJSONResult.errorMsg("用户id不能为空");
+        }
+
+        Comment comment = commentService.queryComment(commentId);
+        if (comment == null) {
+            return CropJSONResult.errorMsg("评论id不存在");
+        }
+
+        User user = userService.queryUser(userId);
+        if (user == null) {
+            return CropJSONResult.errorMsg("用户id不存在");
+        }
+
+        if (comment.getFromUserId() != user.getId()) {
+            return CropJSONResult.errorMsg("非本用户评论无权撤回");
+        }
+
+        commentService.setCommentStatusWithFatherId(comment, CommentStatus.BLOCKED);
+
+        return CropJSONResult.ok();
+
     }
 
 }
