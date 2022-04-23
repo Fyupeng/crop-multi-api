@@ -53,6 +53,13 @@ public class CommentVO implements Serializable {
 
     private String fatherCommentContent;
 
+    /**
+     * 状态位
+     * 1 - 正常
+     * 2- 屏蔽
+     */
+    private Integer status;
+
     public CommentVO() {
     }
 
@@ -228,5 +235,13 @@ public class CommentVO implements Serializable {
 
     public void setFatherCommentContent(String fatherCommentContent) {
         this.fatherCommentContent = fatherCommentContent;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }
