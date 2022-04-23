@@ -1,5 +1,7 @@
 package com.crop.admin.controller;
 
+import com.crop.enums.CommentStatus;
+import com.crop.pojo.Comment;
 import com.crop.pojo.User;
 import com.crop.pojo.vo.CommentVO;
 import com.crop.service.CommentService;
@@ -78,8 +80,8 @@ public class AdminCommentController extends BasicController {
             @ApiImplicitParam(name = "aPattern", value = "文章匹配", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "cPattern", value = "评论匹配", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "userId", value = "用户id", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "startTime", value = "评论开始时间 - yyyy-MM-dd hh-mm-ss", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "endTime", value = "评论结束时间 - yyyy-MM-dd hh-mm-ss", required = true, dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "startTime", value = "评论开始时间 - yyyy-MM-dd HH:mm:ss", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "评论结束时间 - yyyy-MM-dd HH:mm:ss", required = true, dataType = "String", paramType = "query")
     })
     public CropJSONResult filterComments(String aPattern, String cPattern, String userId, String startTime, String endTime) {
 
@@ -91,7 +93,7 @@ public class AdminCommentController extends BasicController {
             return CropJSONResult.errorMsg("必须指定时间跨度");
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date startDate = null;
         Date endDate = null;
         try {
@@ -110,6 +112,43 @@ public class AdminCommentController extends BasicController {
         }
 
         return CropJSONResult.ok(result);
+
+    }
+    @PostMapping(value = "/blockComment")
+    @ApiOperation(value = "屏蔽评论 - 1 正常 - 2 屏蔽", notes = "屏蔽评论的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "commentId", value = "评论id", dataType = "Integer", paramType = "query"),
+            @ApiImplicitParam(name = "status", value = "评论状态", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "userId", value = "用户id", dataType = "String", paramType = "query"),
+    })
+    public CropJSONResult setCommentStatus(String commentId, Integer status, String userId) {
+
+        if (StringUtils.isBlank(commentId) || status == null) {
+            return CropJSONResult.errorMsg("评论id或状态不能为空");
+        }
+
+        if (StringUtils.isBlank(userId)) {
+            return CropJSONResult.errorMsg("用户id不能为空");
+        }
+
+        Comment comment = commentService.queryComment(commentId);
+        if (comment == null) {
+            return CropJSONResult.errorMsg("评论id不存在");
+        }
+
+        User user = userService.queryUser(userId);
+        if (user == null || user.getPermission() == 2) {
+            return CropJSONResult.errorMsg("用户id不存在或无权限访问");
+        }
+
+        if (status == 1) {
+            commentService.setCommentStatusWithFatherId(comment, CommentStatus.NORMAL);
+
+        } else if(status == 2) {
+            commentService.setCommentStatusWithFatherId(comment, CommentStatus.BLOCKED);
+        }
+
+        return CropJSONResult.ok();
 
     }
 
