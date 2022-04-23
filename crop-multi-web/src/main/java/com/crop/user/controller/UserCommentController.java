@@ -199,7 +199,7 @@ public class UserCommentController extends BasicController {
         return CropJSONResult.ok();
     }
 
-    @PostMapping(value = "/removeMyComment")
+    @PostMapping(value = "/rollbackMyComment")
     @ApiOperation(value = "撤回评论", notes = "撤回评论的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "commentId", value = "评论id", required = true, dataType = "String", paramType = "query"),
@@ -225,7 +225,7 @@ public class UserCommentController extends BasicController {
             return CropJSONResult.errorMsg("用户id不存在");
         }
 
-        if (comment.getFromUserId() != user.getId()) {
+        if (!comment.getFromUserId().equals(user.getId())) {
             return CropJSONResult.errorMsg("非本用户评论无权撤回");
         }
 

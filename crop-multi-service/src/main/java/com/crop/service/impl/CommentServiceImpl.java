@@ -326,7 +326,7 @@ public class CommentServiceImpl implements CommentService {
             //time
             String createTimeAgo = TimeAgoUtils.format(ct.getCreateTime());
             commentVO.setCreateTimeAgo(createTimeAgo);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String normalCreateTime = sdf.format(ct.getCreateTime());
             commentVO.setNormalCreateTime(normalCreateTime);
 

@@ -64,7 +64,7 @@ public class Comment implements Serializable {
      *  0 - 正常状态
      *  1 - 屏蔽
      */
-    @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "状态", hidden = true)
     private Integer status;
 
 

@@ -45,7 +45,7 @@ public class AdminCommentController extends BasicController {
     private CommentService commentService;
 
     @PostMapping(value = "removeComment")
-    @ApiOperation(value = "撤回评论", notes = "撤回评论的接口")
+    @ApiOperation(value = "强制删除评论", notes = "强制删除评论的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "commentId", value = "评论id", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
@@ -114,7 +114,7 @@ public class AdminCommentController extends BasicController {
         return CropJSONResult.ok(result);
 
     }
-    @PostMapping(value = "/blockComment")
+    @PostMapping(value = "/setCommentStatus")
     @ApiOperation(value = "屏蔽评论 - 1 正常 - 2 屏蔽", notes = "屏蔽评论的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "commentId", value = "评论id", dataType = "Integer", paramType = "query"),
@@ -146,6 +146,8 @@ public class AdminCommentController extends BasicController {
 
         } else if(status == 2) {
             commentService.setCommentStatusWithFatherId(comment, CommentStatus.BLOCKED);
+        } else {
+            return CropJSONResult.errorMsg("无其他状态可操作");
         }
 
         return CropJSONResult.ok();
