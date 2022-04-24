@@ -539,6 +539,9 @@ public class UserArticleController extends BasicController {
             return CropJSONResult.errorMsg("articleId不存在或者userId与commentId约束的userId不同");
         }
 
+        /**
+         * 删除文章 以及删除 与 文章 id 关联的 其他表数据
+         */
         articleService.removeArticle(articleId);
 
         return CropJSONResult.ok();

@@ -11,6 +11,7 @@ import com.crop.service.ArticleService;
 import com.crop.service.TagService;
 import com.crop.utils.PagedResult;
 import com.crop.utils.TimeAgoUtils;
+import com.mongodb.WriteResult;
 import org.apache.commons.lang3.StringUtils;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
@@ -245,7 +246,16 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeArticle(String articleId) {
+        // 删除文章
         articleRepository.delete(articleId);
+        // 删除关联标签
+        Articles2tags articles2tags = new Articles2tags();
+        articles2tags.setArticleId(articleId);
+        tagService.deleteTagAndArticleTag(articles2tags);
+        // 删除评论
+        Query query = new Query();
+        query.addCriteria(Criteria.where("articleId").is(articleId));
+        mongoTemplate.remove(query);
     }
 
 

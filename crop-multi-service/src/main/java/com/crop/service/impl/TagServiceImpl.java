@@ -87,6 +87,10 @@ public class TagServiceImpl implements TagService {
 
         List<Articles2tags> articles2tagsList = articles2tagsMapper.select(articles2tags);
 
+        for (Articles2tags tags : articles2tagsList) {
+            System.out.println(tags);
+        }
+
         List<Articles2tagsVO> articles2tagsVOList = new ArrayList<>();
         for (Articles2tags articleTags : articles2tagsList) {
 
@@ -173,9 +177,23 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public boolean updateArticleTag(Articles2tags articles2tags) {
 
         int i = articles2tagsMapper.updateByPrimaryKey(articles2tags);
+
+        return i > 0 ? true : false;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public boolean deleteTagAndArticleTag(Articles2tags articles2tags) {
+        Example example = new Example(Articles2tags.class);
+
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("articleId", articles2tags);
+
+        int i = articles2tagsMapper.deleteByExample(example);
 
         return i > 0 ? true : false;
     }

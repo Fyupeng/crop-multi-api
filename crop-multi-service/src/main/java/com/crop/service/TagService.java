@@ -42,4 +42,6 @@ public interface TagService {
     boolean saveArticleTag(Articles2tags articles2tags);
 
     boolean updateArticleTag(Articles2tags articles2tags);
+
+    boolean deleteTagAndArticleTag(Articles2tags articles2tags);
 }
