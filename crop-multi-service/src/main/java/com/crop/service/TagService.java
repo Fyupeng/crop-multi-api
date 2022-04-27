@@ -33,7 +33,7 @@ public interface TagService {
 
     void delArticleTag(String tagId);
 
-    boolean deleteTagAndArticleTag(String tagId);
+    boolean deleteTagAndArticleTagWithTagId(String tagId);
 
     Tag queryTag(String tagId);
 
@@ -43,5 +43,5 @@ public interface TagService {
 
     boolean updateArticleTag(Articles2tags articles2tags);
 
-    boolean deleteTagAndArticleTag(Articles2tags articles2tags);
+    boolean deleteTagAndArticleTagWithArticleId(String articleId);
 }

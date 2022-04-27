@@ -125,7 +125,7 @@ public class UserTagController extends BasicController {
 
         // 1. 移除 Tag
         // 2. 移除 Articles2Tags
-        boolean delTagIsTrue = tagService.deleteTagAndArticleTag(tagId);
+        boolean delTagIsTrue = tagService.deleteTagAndArticleTagWithTagId(tagId);
 
         if (!delTagIsTrue) {
             return CropJSONResult.errorMsg("标签id不存在或内部错误导致删除失败");

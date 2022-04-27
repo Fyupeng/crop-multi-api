@@ -19,6 +19,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @Auther: fyp
@@ -99,27 +100,37 @@ public class TagServiceImpl implements TagService {
 
             Tag tag = tagMapper.selectByPrimaryKey(tagId);
 
-            Article one = articleRepository.findOne(articleId);
-            Classfication classfication = classficationMapper.selectByPrimaryKey(one.getClassId());
+            Article article = new Article();
+            article.setId(articleId);
 
-            Articles2tagsVO articles2tagsVO = new Articles2tagsVO();
-            BeanUtils.copyProperties(articleTags, articles2tagsVO);
+            org.springframework.data.domain.Example<Article> articleExample = org.springframework.data.domain.Example.of(article);
 
-            articles2tagsVO.setTagName(tag.getName());
-            articles2tagsVO.setTitle(one.getTitle());
-            articles2tagsVO.setClassficationName(classfication.getName());
-            articles2tagsVO.setCommentCounts(one.getCommentCounts());
-            articles2tagsVO.setReadCounts(one.getReadCounts());
-            articles2tagsVO.setReceiveLikeCounts(one.getReceiveLikeCounts());
 
-            String createTimeAgo = TimeAgoUtils.format(one.getCreateTime());
-            String updateTimaAgo = TimeAgoUtils.format(one.getUpdateTime());
+            Optional<Article> articleOptional = articleRepository.findOne(articleExample);
+            Article one = articleOptional.isPresent() ? articleOptional.get() : null;
 
-            articles2tagsVO.setCreateTimeAgoStr(createTimeAgo);
-            articles2tagsVO.setUpdateTimeAgoStr(updateTimaAgo);
+            if (one != null) {
 
-            articles2tagsVOList.add(articles2tagsVO);
+                Classfication classfication = classficationMapper.selectByPrimaryKey(one.getClassId());
 
+                Articles2tagsVO articles2tagsVO = new Articles2tagsVO();
+                BeanUtils.copyProperties(articleTags, articles2tagsVO);
+
+                articles2tagsVO.setTagName(tag.getName());
+                articles2tagsVO.setTitle(one.getTitle());
+                articles2tagsVO.setClassficationName(classfication.getName());
+                articles2tagsVO.setCommentCounts(one.getCommentCounts());
+                articles2tagsVO.setReadCounts(one.getReadCounts());
+                articles2tagsVO.setReceiveLikeCounts(one.getReceiveLikeCounts());
+
+                String createTimeAgo = TimeAgoUtils.format(one.getCreateTime());
+                String updateTimaAgo = TimeAgoUtils.format(one.getUpdateTime());
+
+                articles2tagsVO.setCreateTimeAgoStr(createTimeAgo);
+                articles2tagsVO.setUpdateTimeAgoStr(updateTimaAgo);
+
+                articles2tagsVOList.add(articles2tagsVO);
+            }
         }
 
         return articles2tagsVOList;
@@ -187,11 +198,11 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean deleteTagAndArticleTag(Articles2tags articles2tags) {
+    public boolean deleteTagAndArticleTagWithArticleId(String articleId) {
         Example example = new Example(Articles2tags.class);
 
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("articleId", articles2tags);
+        criteria.andEqualTo("articleId", articleId);
 
         int i = articles2tagsMapper.deleteByExample(example);
 
@@ -230,7 +241,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean deleteTagAndArticleTag(String tagId) {
+    public boolean deleteTagAndArticleTagWithTagId(String tagId) {
         boolean result = deleteTag(tagId);
         if (result)
             delArticleTag(tagId);

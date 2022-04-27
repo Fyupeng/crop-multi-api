@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Console;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -63,7 +64,13 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public boolean queryArticleIsExist(String articleId) {
 
-        Article article = articleRepository.findOne(articleId);
+        Article article = new Article();
+        article.setId(articleId);
+
+        Example<Article> articleExample = Example.of(article);
+
+        Optional<Article> one = articleRepository.findOne(articleExample);
+        Article result = one.isPresent() ? one.get() : null;
 
         return article == null ? false : true;
     }
@@ -78,7 +85,8 @@ public class ArticleServiceImpl implements ArticleService {
 
         Example<Article> articleExample = Example.of(article, exampleMatcher);
 
-        Article result = articleRepository.findOne(articleExample);
+        Optional<Article> one = articleRepository.findOne(articleExample);
+        Article result = one.isPresent() ? one.get() : null;
 
         return result == null ? false : true;
     }
@@ -184,7 +192,13 @@ public class ArticleServiceImpl implements ArticleService {
         /**
          * 每次获取 文章，该 文章的 阅读数要 自增 1
          */
-        Article result = articleRepository.findOne(articleId);
+
+        Article article = new Article();
+        article.setId(articleId);
+        Example<Article> articleExample = Example.of(article);
+
+        Optional<Article> one = articleRepository.findOne(articleExample);
+        Article result = one.isPresent() ? one.get() : null;
         ArticleVO articleVO = new ArticleVO();
         if (result != null) {
             BeanUtils.copyProperties(result, articleVO);
@@ -233,29 +247,49 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void multiUpdateArticleReadCounts(List<String> articleIdKeys, Map<String, String> articleMap) {
         for (String articleId : articleIdKeys) {
-            Article oldArticle = articleRepository.findOne(articleId);
+
+            Article article = new Article();
+            article.setId(articleId);
+
+            Example<Article> articleExample = Example.of(article);
+
+            Optional<Article> one = articleRepository.findOne(articleExample);
+            Article oldArticle = one.isPresent() ? one.get() : null;
             // 获取 articleId 对应的 readCounts
             String readCounts = articleMap.get(articleId);
             // 更新 readCounts
-            oldArticle.setReadCounts(Integer.parseInt(readCounts));
+            if (oldArticle != null) {
+                oldArticle.setReadCounts(Integer.parseInt(readCounts));
 
-            articleRepository.save(oldArticle);
+                articleRepository.save(oldArticle);
+            }
         }
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeArticle(String articleId) {
-        // 删除文章
-        articleRepository.delete(articleId);
-        // 删除关联标签
-        Articles2tags articles2tags = new Articles2tags();
-        articles2tags.setArticleId(articleId);
-        tagService.deleteTagAndArticleTag(articles2tags);
+
+
+        /**
+         * 必须根据 id 删除
+
+        Article article = new Article();
+        article.setId(articleId);
+        articleRepository.delete(article);
+         */
+        Query queryArticle = new Query();
+        queryArticle.addCriteria(Criteria.where("id").is(articleId));
+        mongoTemplate.remove(queryArticle, Article.class);
+
         // 删除评论
-        Query query = new Query();
-        query.addCriteria(Criteria.where("articleId").is(articleId));
-        mongoTemplate.remove(query);
+        Query queryComment = new Query();
+        queryComment.addCriteria(Criteria.where("articleId").is(articleId));
+        mongoTemplate.remove(queryComment, Comment.class);
+
+        // 删除关联标签nav
+        tagService.deleteTagAndArticleTagWithArticleId(articleId);
+
     }
 
 
@@ -411,7 +445,13 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(propagation = Propagation.REQUIRED)
     public boolean saveWithIdAndUserId(Article article) {
 
-        Article oldArticle = articleRepository.findOne(article.getId());
+        Article article1 = new Article();
+        article.setId(article.getId());
+
+        Example<Article> articleExample = Example.of(article1);
+
+        Optional<Article> one = articleRepository.findOne(articleExample);
+        Article oldArticle = one.isPresent() ? one.get() : null;
 
         article.setCreateTime(oldArticle.getCreateTime());
         article.setReadCounts(oldArticle.getReadCounts());

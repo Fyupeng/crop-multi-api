@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @Auther: fyp
@@ -54,13 +55,29 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public boolean queryCommentIsExist(String commentId) {
-        return commentRepository.findOne(commentId) == null ? false : true;
+
+        Comment comment = new Comment();
+        comment.setId(commentId);
+
+        Example<Comment> commentExample = Example.of(comment);
+
+        Optional<Comment> one = commentRepository.findOne(commentExample);
+
+        return one.isPresent() ? true : false;
     }
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public Comment queryComment(String commentId) {
-        return commentRepository.findOne(commentId);
+
+        Comment comment = new Comment();
+        comment.setId(commentId);
+
+        Example<Comment> commentExample = Example.of(comment);
+
+        Optional<Comment> one = commentRepository.findOne(commentExample);
+
+        return one.isPresent() ? one.get() : null;
     }
 
     @Override
@@ -137,9 +154,9 @@ public class CommentServiceImpl implements CommentService {
 
         Example<Comment> commentExample = Example.of(comment, exampleMatcher);
 
-        Comment result = commentRepository.findOne(commentExample);
+        Optional<Comment> one = commentRepository.findOne(commentExample);
 
-        return result == null ? false : true;
+        return one.isPresent() ? true : false;
     }
 
     @Override
@@ -150,6 +167,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setId(commentId);
         comment.setCreateTime(new Date());
         comment.setStatus(CommentStatus.NORMAL.getStatus());
+
         Comment result = commentRepository.save(comment);
 
         return result == null ? false : true;
@@ -160,6 +178,7 @@ public class CommentServiceImpl implements CommentService {
     public boolean updateComment(Comment comment) {
 
         comment.setStatus(CommentStatus.NORMAL.getStatus());
+
         Comment result = commentRepository.save(comment);
 
         return result == null ? false : true;
@@ -169,7 +188,10 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeCommentById(String commentId) {
 
-        commentRepository.delete(commentId);
+        Comment comment = new Comment();
+        comment.setId(commentId);
+
+        commentRepository.delete(comment);
 
     }
 
@@ -311,8 +333,15 @@ public class CommentServiceImpl implements CommentService {
             // fatherCommentContent
             String fatherCommentId = ct.getFatherCommentId();
             if (fatherCommentId != null) {
-                Comment fatherComment = commentRepository.findOne(fatherCommentId);
-                commentVO.setFatherCommentContent(fatherComment.getComment());
+                Comment comment = new Comment();
+                comment.setId(fatherCommentId);
+
+                Example<Comment> commentExample = Example.of(comment);
+
+                Optional<Comment> one = commentRepository.findOne(commentExample);
+                if (one.isPresent()) {
+                    commentVO.setFatherCommentContent(one.get().getComment());
+                }
             }
             // toUser
             String toUserId = ct.getToUserId();
