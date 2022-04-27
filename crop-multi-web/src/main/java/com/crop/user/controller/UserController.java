@@ -28,6 +28,12 @@ public class UserController extends BasicController{
     @Autowired
     private UserService userService;
 
+    @GetMapping(value = "/pingNetWork")
+    @ApiOperation(value = "测试网络环境", notes = "测试网络环境的接口")
+    public CropJSONResult pingNetWork() {
+        return CropJSONResult.build(200, "ping successful!", null);
+    }
+
     @ApiOperation(value = "查询用户信息", notes = "查询用户信息的接口")
     @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "query")
     @PostMapping(value = "/query")
