@@ -20,23 +20,30 @@
     <name>微信小程序-农作物多端检测平台</name>
     <description>
         maven
-        springmvc
         springboot
         mybatis
         mybatis-pagehelper
         redis
-        ffmpeg
+        mongodb
         druid
         mariadb/mysql
-        zookeeper音频操作
     </description>
+
+<!--    <parent>-->
+<!--        <groupId>org.springframework.boot</groupId>-->
+<!--        <artifactId>spring-boot-starter-parent</artifactId>-->
+<!--        <version>1.5.12.RELEASE</version>-->
+<!--        <relativePath/>-->
+<!--    </parent>-->
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.12.RELEASE</version>
+        <version>2.1.2.RELEASE</version>
         <relativePath/>
     </parent>
+
+
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
