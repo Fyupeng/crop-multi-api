@@ -6,9 +6,13 @@
 #### 软件架构
 软件架构说明
 
-接口文档：[http://47.107.63.171:8083/swagger-ui.htm](http://47.107.63.171:8083/swagger-ui.html)
+项目架构：
 
-数据映射url：[http://47.107.63.171:9001/crop_multi_data/](http://47.107.63.171:9001/crop_multi_data/)
+![基于vue的植物识别博客系统](https://yupeng-tuchuang.oss-cn-shenzhen.aliyuncs.com/基于vue的植物鉴别博客系统.png)
+
+接口文档：[http://fyp.fit:8083/swagger-ui.htm](http://47.107.63.171:8083/swagger-ui.html)
+
+数据映射url：[http://fyp.fit:9001/crop_multi_data/](http://47.107.63.171:9001/crop_multi_data/)
 
 后端数据存储采用两台服务器支持，一台作为mysql和reids缓存和基本类型数据存储，另一台作为大数据文章类型存储。
 
@@ -73,11 +77,3 @@
 1. 修复标记标签和重新标记标签出现的问题
 
 
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
