@@ -10,9 +10,9 @@
 
 ![基于vue的植物识别博客系统](https://yupeng-tuchuang.oss-cn-shenzhen.aliyuncs.com/基于vue的植物鉴别博客系统.png)
 
-接口文档：[http://fyp.fit:8083/swagger-ui.htm](http://47.107.63.171:8083/swagger-ui.html)
+接口文档：[http://fyp.fit:8083/swagger-ui.html](http://www.fyp.fit:8083/swagger-ui.html)
 
-数据映射url：[http://fyp.fit:9001/crop_multi_data/](http://47.107.63.171:9001/crop_multi_data/)
+数据映射url：[http://fyp.fit:9001/crop_multi_data/](http://www.fyp.fit:9001/crop_multi_data/)
 
 后端数据存储采用两台服务器支持，一台作为mysql和reids缓存和基本类型数据存储，另一台作为大数据文章类型存储。
 
