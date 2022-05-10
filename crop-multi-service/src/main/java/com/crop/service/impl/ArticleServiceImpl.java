@@ -446,7 +446,7 @@ public class ArticleServiceImpl implements ArticleService {
     public boolean saveWithIdAndUserId(Article article) {
 
         Article article1 = new Article();
-        article.setId(article.getId());
+        article1.setId(article.getId());
 
         Example<Article> articleExample = Example.of(article1);
 

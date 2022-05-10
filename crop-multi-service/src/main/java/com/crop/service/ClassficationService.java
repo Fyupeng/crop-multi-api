@@ -16,7 +16,7 @@ public interface ClassficationService {
 
     boolean saveClassfication(Classfication classfication);
 
-    Classfication queryClssfication(Classfication classfication);
+    Classfication queryClassfication(Classfication classfication);
 
     List<Classfication> queryAllClassfications();
 
