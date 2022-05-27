@@ -91,6 +91,11 @@ public class UserController extends BasicController{
         if(StringUtils.isBlank(userId)){
             return CropJSONResult.errorMsg("用户id不能为空");
         }
+
+        if (!userService.queryUserIdIsExist(userId)) {
+            return CropJSONResult.errorMsg("用户id不存在");
+        }
+
         //保存到数据库中的相对路径
         String uploadPathDB = "/" + userId + "/face";
 
