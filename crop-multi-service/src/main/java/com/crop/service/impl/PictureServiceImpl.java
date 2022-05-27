@@ -61,17 +61,17 @@ public class PictureServiceImpl implements PictureService {
         if(page <= 0){
             page = 1;
         }
-        // page 分页 在 mongodb 中是 从 0 开始的
+
         page = page - 1;
 
         if(pageSize <= 0){
             pageSize = 10;
         }
 
-        List<Picture> pictureList = pictureMapper.select(picture);
-
         PageHelper pageHelper = new PageHelper();
         pageHelper.startPage(page, pageSize);
+
+        List<Picture> pictureList = pictureMapper.select(picture);
 
         PageInfo<Picture> pageInfo = new PageInfo<>(pictureList);
 
