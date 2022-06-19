@@ -95,7 +95,7 @@ public class UserArticleController extends BasicController {
         Classfication classfication = new Classfication();
         classfication.setName(searchKey);
 
-        Classfication cf = classficationService.queryClssfication(classfication);
+        Classfication cf = classficationService.queryClassfication(classfication);
 
         Article article = new Article();
         if (cf != null) {
@@ -192,7 +192,7 @@ public class UserArticleController extends BasicController {
         Classfication classfication = new Classfication();
         classfication.setName(searchKey);
 
-        Classfication cf = classficationService.queryClssfication(classfication);
+        Classfication cf = classficationService.queryClassfication(classfication);
 
         Article article = new Article();
         if (cf != null) {

@@ -78,7 +78,7 @@ public class UserRegistLoginController extends BasicController{
 
 
         if(StringUtils.isBlank(username) || StringUtils.isBlank(password)){
-            return CropJSONResult.ok("用户名或密码不能为空....");
+            return CropJSONResult.errorMsg("用户名或密码不能为空....");
         }
 
         User userResult = userService.queryUserForLogin(username, MD5Utils.getMD5Str(user.getPassword()));

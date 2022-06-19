@@ -2,10 +2,10 @@ package com.crop.user.controller;
 
 import com.crop.pojo.Picture;
 import com.crop.service.PictureService;
+import com.crop.service.UserService;
 import com.crop.utils.CropJSONResult;
 import com.crop.utils.PagedResult;
 import io.swagger.annotations.*;
-import org.apache.commons.io.FileCleaner;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +34,9 @@ public class UserPictureController extends BasicController {
 
     @Autowired
     private PictureService pictureService;
+
+    @Autowired
+    private UserService userService;
 
     @ApiOperation(value = "获取用户图片", notes = "获取用户图片的接口")
     @ApiImplicitParams({
@@ -66,23 +69,28 @@ public class UserPictureController extends BasicController {
     }
 
     @ApiOperation(value = "上传图片 - 图片id 请忽略", notes = "上传图片的接口")
-    @ApiImplicitParam(name = "picture", value = "图片信息", required = true, dataType = "Picture", paramType = "body")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "用户id", required = true, dataType = "String", paramType = "form"),
+            @ApiImplicitParam(name = "pictureDesc", value = "图片描述", required = true, dataType = "String", paramType = "form"),
+            @ApiImplicitParam(name = "pictureHeight", value = "图片高度", dataType = "Double", paramType = "form"),
+            @ApiImplicitParam(name = "pictureWidth", value = "图片宽度", dataType = "Double", paramType = "form")
+    })
     @PostMapping(value = "/upload", headers = "content-type=multipart/form-data")
-    public CropJSONResult upload(@RequestBody Picture picture,
+    public CropJSONResult upload(String userId, String pictureDesc,
             /*@RequestParam(value = "file")  这两个注解不能搭配使用，会导致 文件上传按钮失效*/
                                  @ApiParam(value = "图片") MultipartFile file) throws Exception{
 
 
-        if(StringUtils.isBlank(picture.getUserId()) || StringUtils.isBlank(picture.getPictureDesc())){
+        if(StringUtils.isBlank(userId) || StringUtils.isBlank(pictureDesc)){
             return CropJSONResult.errorMsg("用户id和图片描述不能为空");
         }
 
-        String userId = picture.getUserId();
-        String pictureDesc = picture.getPictureDesc();
+        if (!userService.queryUserIdIsExist(userId)) {
+            return CropJSONResult.errorMsg("用户id不存在");
+        }
 
         //保存到数据库中的相对路径
         String uploadPathDB = "/" + userId + "/picture";
-
 
         FileOutputStream fileOutputStream = null;
         InputStream inputStream = null;

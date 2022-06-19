@@ -88,13 +88,14 @@ public class UserController extends BasicController{
                                      @RequestParam(value = "file") /* 这两个注解不能搭配使用，会导致 文件上传按钮失效*/
                                      /*@ApiParam(value = "头像")*/ MultipartFile file) throws Exception{
 
-        System.out.println(userId);
-        System.out.println(file.getOriginalFilename());
-
-
         if(StringUtils.isBlank(userId)){
             return CropJSONResult.errorMsg("用户id不能为空");
         }
+
+        if (!userService.queryUserIdIsExist(userId)) {
+            return CropJSONResult.errorMsg("用户id不存在");
+        }
+
         //保存到数据库中的相对路径
         String uploadPathDB = "/" + userId + "/face";
 
@@ -181,11 +182,5 @@ public class UserController extends BasicController{
 
         return updateTrue ? CropJSONResult.ok(userForUpdate) : CropJSONResult.errorMsg("修改失败");
     }
-
-
-
-
-
-
 
 }

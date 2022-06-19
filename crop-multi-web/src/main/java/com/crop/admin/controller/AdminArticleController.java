@@ -135,7 +135,7 @@ public class AdminArticleController extends BasicController {
         Classfication classfication = new Classfication();
         classfication.setName(classficationName);
 
-        Classfication classficationIsExist = classficationService.queryClssfication(classfication);
+        Classfication classficationIsExist = classficationService.queryClassfication(classfication);
         if (classficationIsExist != null) {
             return CropJSONResult.errorMsg("分类名已存在");
         }

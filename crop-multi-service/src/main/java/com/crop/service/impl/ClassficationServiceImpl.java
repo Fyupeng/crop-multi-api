@@ -46,7 +46,7 @@ public class ClassficationServiceImpl implements ClassficationService {
      */
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public Classfication queryClssfication(Classfication classfication) {
+    public Classfication queryClassfication(Classfication classfication) {
 
         List<Classfication> result = classficationMapper.select(classfication);
 
