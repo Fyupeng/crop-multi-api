@@ -2,19 +2,24 @@ package com.crop.service.impl;
 
 import com.crop.mapper.PictureMapper;
 import com.crop.pojo.Picture;
+import com.crop.pojo.vo.PictureVO;
 import com.crop.service.PictureService;
 import com.crop.utils.PagedResult;
+import com.crop.utils.TimeAgoUtils;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.n3r.idworker.Sid;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import redis.clients.jedis.BinaryClient;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -73,7 +78,20 @@ public class PictureServiceImpl implements PictureService {
 
         List<Picture> pictureList = pictureMapper.select(picture);
 
-        PageInfo<Picture> pageInfo = new PageInfo<>(pictureList);
+
+        List<PictureVO> pictureVOList = new ArrayList<>();
+        for (Picture pt : pictureList) {
+
+            PictureVO pictureVO = new PictureVO();
+            BeanUtils.copyProperties(pt, pictureVO);
+
+            String uploadTimeAgoStr = TimeAgoUtils.format(pt.getUploadTime());
+            pictureVO.setUploadTimeAgoStr(uploadTimeAgoStr);
+
+            pictureVOList.add(pictureVO);
+        }
+
+        PageInfo<PictureVO> pageInfo = new PageInfo<>(pictureVOList);
 
         PagedResult pagedResult = new PagedResult();
 
