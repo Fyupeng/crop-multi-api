@@ -16,7 +16,7 @@
 
 后端数据存储采用两台服务器支持，一台作为mysql和reids缓存和基本类型数据存储，另一台作为大数据文章类型存储。
 
-数据库支持：mysql、redis、mongodb
+数据库支持：MySQL、Redis、MongoDB
 
 ### 数据处理
 
