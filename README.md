@@ -53,6 +53,59 @@
 
 之所以在前端与后端端口交互之间加了一层代理层，是起到代理后端服务的作用，能够直接屏蔽掉后端的地址，保证后端服务的安全。
 
+- 高可用服务
+
+目前项目后端接口服务只使用了一个端口，在该环境下，还可以启动多端口的接口服务，如果要搭建高可用服务，可以直接到nginx中配置后端代理点，让这个代理点去代理多个服务接口，如果某一个`springboot`挂了（高请求导致），可利用`Nginx`来搭建负载均衡
+
+使用`nginx`搭建反向代理和负载均衡：
+
+前端项目所在机器：
+```xml
+http {
+    // 使用的负载均衡策略
+    upstream cropServer {
+        server [后端ip]:[port] weight=10;
+        server [后端ip]:[port] weight=10;
+    }
+    // 服务代理
+    server {
+        listen    9001;
+        server_name localhost;
+        # Reverse proxy backend server
+        // 负载均衡方式
+        location / {
+            proxy_pass http://cropServer;
+        }
+        // 直连方式
+        location / {
+            proxy_pass http://[ip]:[port];
+        }
+        location /crop_multi_data/ {
+            proxy_pass http://[后端ip]:9001;
+            index index.html index.htm index.jsp;
+        }
+    
+    }
+}
+```
+后端服务所在机器
+代理静态文件
+```xml
+http {
+    server {
+        listen          9001;
+        server_name     127.0.0.1;
+        
+        location /crop_multi_data/ {
+            root /**/***/;
+            autoindex on;
+        }
+    }
+}
+
+```
+上面代理静态文件是通过前台机器代理到后台的代理，再由后台代理映射到本地文件
+
 ### 项目亮点
 
 - 阅读定时同步
