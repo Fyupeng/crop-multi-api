@@ -108,7 +108,7 @@ http {
 
 - 代理层
 
-![代理层](C:/Users/fyp01/Desktop/代理层.png)
+![代理层](https://yupeng-tuchuang.oss-cn-shenzhen.aliyuncs.com/代理层.png)
 
 ### 项目亮点
 
